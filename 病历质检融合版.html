@@ -484,7 +484,7 @@ body {
                             <div>
                                 <div class="ops-section-title">操作区</div>
                                 <div class="act-grid">
-                                    <button class="act-btn fill">查看详情</button>
+                                    <button class="act-btn fill" onclick="showReport(true)">查看详情</button>
                                     <button class="act-btn fill">保存至质检历史</button>
                                     <button class="act-btn fill">导出报告</button>
                                     <button class="act-btn fill">重新质检</button>
@@ -498,6 +498,346 @@ body {
     </div>
 </div>
 
+<!-- ══════ 报告详情页（覆盖层） ══════ -->
+<div id="report-page" style="display:none; position:fixed; top:44px; left:152px; right:0; bottom:0; background:#f0f2f5; overflow-y:auto; z-index:200;">
+<style>
+.rp { padding:16px; height:100%; display:flex; flex-direction:column; }
+
+/* 报告头 */
+.rp-header {
+    background:#fff; border-radius:8px; padding:16px 20px;
+    margin-bottom:14px; flex-shrink:0;
+}
+.rp-header-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; }
+.rp-title { font-size:20px; font-weight:600; color:#111827; }
+.rp-btns { display:flex; gap:8px; flex-shrink:0; }
+.rp-btn { padding:8px 16px; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; border:none; transition:all .15s; }
+.rp-btn.primary { background:#2563eb; color:#fff; }
+.rp-btn.primary:hover { background:#1d4ed8; }
+.rp-btn.secondary { background:#fff; color:#374151; border:1px solid #d1d5db; }
+.rp-btn.secondary:hover { background:#f9fafb; }
+.rp-meta { display:flex; flex-wrap:wrap; gap:0; font-size:13px; color:#374151; }
+.rp-meta-item { margin-right:32px; margin-bottom:4px; }
+.rp-meta-item .lbl { color:#9ca3af; margin-right:6px; }
+.rp-meta-item .val { color:#111827; font-weight:500; }
+
+/* 主体两栏 */
+.rp-body {
+    flex:1; display:flex; gap:14px; min-height:0;
+}
+
+/* 左：病历原文 */
+.rp-left {
+    flex:1; background:#fff; border-radius:8px; border:1px solid #e5e7eb;
+    display:flex; flex-direction:column; overflow:hidden;
+}
+.rp-doc-header { padding:14px 20px; font-size:14px; font-weight:600; color:#111827; border-bottom:1px solid #f3f4f6; flex-shrink:0; }
+.rp-doc-tabs {
+    display:flex; border-bottom:1px solid #e5e7eb; padding:0 20px; flex-shrink:0;
+}
+.rp-doc-tab {
+    padding:10px 14px; font-size:13px; color:#6b7280; cursor:pointer;
+    border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .15s; white-space:nowrap;
+}
+.rp-doc-tab:hover { color:#2563eb; }
+.rp-doc-tab.active { color:#2563eb; border-bottom-color:#2563eb; font-weight:500; }
+.rp-doc-content { flex:1; overflow-y:auto; padding:20px; }
+.rp-doc-panel { display:none; font-size:13px; line-height:2; color:#374151; }
+.rp-doc-panel.active { display:block; }
+.rp-doc-panel .location {
+    font-size:12px; color:#6b7280; padding:6px 12px;
+    background:#f8fafc; border-radius:4px; margin-bottom:16px;
+    border-left:3px solid #e5e7eb;
+}
+.rp-doc-panel p { margin-bottom:10px; }
+.rp-doc-panel h4 { font-size:13px; font-weight:600; margin:16px 0 6px; color:#111827; }
+
+/* 右：质检解释区 */
+.rp-right {
+    width:520px; flex-shrink:0; display:flex; flex-direction:column; gap:12px; overflow-y:auto;
+}
+
+/* 成分摘要卡 */
+.rp-summary-card {
+    background:#fff; border-radius:8px; border:1px solid #e5e7eb; padding:16px 18px;
+}
+.rp-summary-title { font-size:14px; font-weight:600; color:#111827; margin-bottom:12px; }
+.rp-score-strip {
+    display:flex; gap:0; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin-bottom:14px;
+}
+.rp-score-col {
+    flex:1; padding:10px 4px; text-align:center; border-right:1px solid #e5e7eb;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+.rp-score-col:last-child { border-right:none; }
+.rp-score-col .num {
+    font-size:20px; font-weight:700; color:#111827; line-height:1.2;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;
+}
+.rp-score-col .num.green { color:#10b981; }
+.rp-score-col .num.orange { color:#f59e0b; }
+.rp-score-col .num.red { color:#ef4444; }
+.rp-score-col .lbl { font-size:11px; color:#9ca3af; margin-top:3px; white-space:nowrap; }
+
+/* 内容 Tab */
+.rp-tabs { display:flex; border-bottom:1px solid #e5e7eb; margin-bottom:0; }
+.rp-tab {
+    padding:10px 14px; font-size:13px; color:#6b7280; cursor:pointer;
+    border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .15s; white-space:nowrap;
+}
+.rp-tab:hover { color:#2563eb; }
+.rp-tab.active { color:#2563eb; border-bottom-color:#2563eb; font-weight:500; }
+.rp-tab-panels { padding:14px 0; }
+.rp-tab-panel { display:none; }
+.rp-tab-panel.active { display:block; }
+
+/* 缺陷建议列表 */
+.rp-defect-item {
+    border:1px solid #e5e7eb; border-radius:6px; padding:14px;
+    margin-bottom:10px; background:#fff;
+}
+.rp-defect-item:last-child { margin-bottom:0; }
+.rp-defect-row1 { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+.rp-defect-name { font-size:13px; font-weight:600; color:#111827; }
+.rp-defect-score { font-size:13px; font-weight:600; color:#ef4444; }
+.rp-defect-tags { display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
+.rp-dtag { padding:2px 8px; border-radius:3px; font-size:11px; }
+.rp-dtag.type { background:#eff6ff; color:#2563eb; }
+.rp-dtag.risk { background:#fef3c7; color:#b45309; }
+.rp-dtag.risk-high { background:#fef2f2; color:#ef4444; }
+.rp-defect-info { font-size:12px; color:#6b7280; display:flex; flex-direction:column; gap:4px; margin-bottom:8px; }
+.rp-defect-info span { display:flex; gap:6px; }
+.rp-defect-info .k { color:#9ca3af; white-space:nowrap; }
+.rp-defect-desc { font-size:12px; color:#374151; background:#f8fafc; border-radius:4px; padding:8px 10px; margin-bottom:8px; line-height:1.7; }
+.rp-defect-actions { display:flex; gap:6px; }
+.rp-da-btn {
+    padding:5px 12px; border-radius:4px; font-size:12px; cursor:pointer;
+    border:1px solid #d1d5db; background:#fff; color:#374151; transition:all .15s;
+}
+.rp-da-btn:hover { background:#f9fafb; }
+.rp-da-btn.primary { background:#2563eb; color:#fff; border-color:#2563eb; }
+.rp-da-btn.primary:hover { background:#1d4ed8; }
+
+/* 患者画像表格 */
+.rp-patient-table { width:100%; font-size:13px; }
+.rp-patient-table tr td { padding:7px 0; border-bottom:1px solid #f3f4f6; }
+.rp-patient-table tr:last-child td { border-bottom:none; }
+.rp-patient-table .k { color:#9ca3af; width:40%; }
+.rp-patient-table .v { color:#111827; font-weight:500; }
+</style>
+
+<div class="rp">
+    <!-- 报告头 -->
+    <div class="rp-header">
+        <div class="rp-header-top">
+            <div class="rp-title">病历智能质控评估报告</div>
+            <div class="rp-btns">
+                <button class="rp-btn secondary" onclick="showReport(false)">返回列表</button>
+                <button class="rp-btn primary">重新质检</button>
+                <button class="rp-btn primary">导出报告</button>
+            </div>
+        </div>
+        <div class="rp-meta">
+            <div class="rp-meta-item"><span class="lbl">患者名称</span><span class="val">王小明</span></div>
+            <div class="rp-meta-item"><span class="lbl">入院号</span><span class="val">123456</span></div>
+            <div class="rp-meta-item"><span class="lbl">部门</span><span class="val">呼吸医学</span></div>
+            <div class="rp-meta-item"><span class="lbl">上级医生</span><span class="val">张生</span></div>
+            <div class="rp-meta-item"><span class="lbl">检查时间</span><span class="val">2026-06-09 10:00</span></div>
+            <div class="rp-meta-item"><span class="lbl">成分等级</span><span class="val">85/A</span></div>
+        </div>
+    </div>
+
+    <!-- 主体两栏 -->
+    <div class="rp-body">
+        <!-- 左：病历原文 -->
+        <div class="rp-left">
+            <div class="rp-doc-header">待检病历原始文本</div>
+            <div class="rp-doc-tabs">
+                <div class="rp-doc-tab active" onclick="switchDocTab(this,'doc-1')">病案首页</div>
+                <div class="rp-doc-tab" onclick="switchDocTab(this,'doc-2')">入院记录</div>
+                <div class="rp-doc-tab" onclick="switchDocTab(this,'doc-3')">首次病程</div>
+                <div class="rp-doc-tab" onclick="switchDocTab(this,'doc-4')">日常病程</div>
+                <div class="rp-doc-tab" onclick="switchDocTab(this,'doc-5')">出院记录</div>
+            </div>
+            <div class="rp-doc-content">
+                <div class="rp-doc-panel active" id="doc-1">
+                    <div class="location">当前定位：病案首页-基本信息</div>
+                    <p><strong>患者名称</strong>：王小明</p>
+                    <p><strong>入院号</strong>：123456</p>
+                    <p><strong>部门</strong>：呼吸医学</p>
+                    <h4>基本情况</h4>
+                    <p>患者王小明，男，52岁，因反复咳嗽咳痰5年，加重伴喘息1周入院。既往有慢性阻塞性肺病病史，长期吸烟史30年。</p>
+                    <p>入院时生命体征：体温36.8℃，脉搏92次/分，呼吸20次/分，血压135/85mmHg，血氧饱和度91%。</p>
+                </div>
+                <div class="rp-doc-panel" id="doc-2">
+                    <div class="location">当前定位：入院记录-主诉与现病史</div>
+                    <h4>主诉</h4>
+                    <p>反复咳嗽咳痰5年，加重伴喘息1周。</p>
+                    <h4>现病史</h4>
+                    <p>患者5年前开始出现咳嗽咳痰，多为白色黏痰，秋冬季节加重，曾多次就诊于当地医院，诊断为慢性支气管炎，予抗感染及对症治疗后好转。</p>
+                    <p>1周前受凉后咳嗽加重，痰量增多，颜色变黄，伴有喘息、胸闷，活动后气短明显，夜间不能平卧。</p>
+                    <p>入院记录时间逻辑错误，推进：-5分，原脱编则11:00。</p>
+                </div>
+                <div class="rp-doc-panel" id="doc-3">
+                    <div class="location">当前定位：首次病程-病情评估</div>
+                    <h4>首次病程记录</h4>
+                    <p>患者入院后完善相关检查，胸部CT示双肺气肿改变，右下肺感染。肺功能检查提示中度阻塞性通气功能障碍。</p>
+                    <p>血常规：白细胞12.3×10⁹/L，中性粒细胞85%，C反应蛋白68mg/L。</p>
+                    <p>初步诊断：慢性阻塞性肺病急性加重，肺部感染。</p>
+                </div>
+                <div class="rp-doc-panel" id="doc-4">
+                    <div class="location">当前定位：日常病程记录</div>
+                    <h4>2026-06-07 病程记录</h4>
+                    <p>患者经抗感染、解痉平喘、化痰治疗后，咳嗽咳痰有所减轻，喘息略有缓解，仍有活动后气短。</p>
+                    <p>体格检查：双肺呼吸音粗，可闻及散在湿性啰音及哮鸣音。继续当前治疗方案。</p>
+                    <h4>2026-06-08 病程记录</h4>
+                    <p>患者病情较前好转，咳嗽减少，痰液转为白色，喘息明显改善，血氧饱和度升至96%。</p>
+                </div>
+                <div class="rp-doc-panel" id="doc-5">
+                    <div class="location">当前定位：出院记录</div>
+                    <h4>出院小结</h4>
+                    <p>患者经10天住院治疗，病情明显好转，咳嗽咳痰减轻，喘息缓解，血氧饱和度维持在96%以上，达到出院标准。</p>
+                    <h4>出院医嘱</h4>
+                    <p>1. 继续口服抗生素5天；2. 沙美特罗/丙酸氟替卡松吸入剂长期维持；3. 戒烟；4. 门诊随访。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右：质检解释区 -->
+        <div class="rp-right">
+            <!-- 成分摘要 -->
+            <div class="rp-summary-card">
+                <div class="rp-score-strip">
+                    <div class="rp-score-col">
+                        <div class="num green">85</div>
+                        <div class="lbl">成分</div>
+                    </div>
+                    <div class="rp-score-col">
+                        <div class="num">A</div>
+                        <div class="lbl">等级</div>
+                    </div>
+                    <div class="rp-score-col">
+                        <div class="num orange">中危</div>
+                        <div class="lbl">风险结论</div>
+                    </div>
+                    <div class="rp-score-col">
+                        <div class="num">无</div>
+                        <div class="lbl">一票否决提示</div>
+                    </div>
+                    <div class="rp-score-col">
+                        <div class="num">15</div>
+                        <div class="lbl">总缺陷</div>
+                    </div>
+                    <div class="rp-score-col">
+                        <div class="num red">2</div>
+                        <div class="lbl">严重缺陷</div>
+                    </div>
+                </div>
+
+                <!-- 内容 Tab -->
+                <div class="rp-tabs">
+                    <div class="rp-tab active" onclick="switchRpTab(this,'rp-defects')">缺陷建议</div>
+                    <div class="rp-tab" onclick="switchRpTab(this,'rp-steps')">质检步骤</div>
+                    <div class="rp-tab" onclick="switchRpTab(this,'rp-patient')">患者画像</div>
+                </div>
+
+                <div class="rp-tab-panels">
+                    <!-- 缺陷建议 -->
+                    <div class="rp-tab-panel active" id="rp-defects">
+                        <div class="rp-defect-item">
+                            <div class="rp-defect-row1">
+                                <div class="rp-defect-name">缺陷名称：入院记录时间逻辑错误</div>
+                                <div class="rp-defect-score">扣扣：-5分</div>
+                            </div>
+                            <div class="rp-defect-tags">
+                                <span class="rp-dtag type">缺陷类型：导抗病</span>
+                                <span class="rp-dtag risk">严重性：中风险</span>
+                            </div>
+                            <div class="rp-defect-info">
+                                <span><span class="k">问题位置：</span>正院记录时间：10分，原脱编则：10:00</span>
+                                <span><span class="k">问题描述：</span>入院记录时间逻辑错误，无流转错误，医生产生症时赢的错误</span>
+                                <span><span class="k">规则基础：</span>根据国家卫生健康委关于印发《病历书写基本规范》</span>
+                            </div>
+                            <div class="rp-defect-desc">修改建议：请将改症该词，改发病能更精稿度的建议。</div>
+                            <div class="rp-defect-actions">
+                                <button class="rp-da-btn">确认</button>
+                                <button class="rp-da-btn">忽略</button>
+                                <button class="rp-da-btn primary">加入报告</button>
+                            </div>
+                        </div>
+                        <div class="rp-defect-item">
+                            <div class="rp-defect-row1">
+                                <div class="rp-defect-name">缺陷名称：入院记录时间逻辑错误</div>
+                                <div class="rp-defect-score">扣扣：-5分</div>
+                            </div>
+                            <div class="rp-defect-tags">
+                                <span class="rp-dtag type">缺陷类型：导椿病</span>
+                                <span class="rp-dtag risk">严重性：中风险</span>
+                            </div>
+                            <div class="rp-defect-info">
+                                <span><span class="k">问题位置：</span>推进：-5分，原脱编则11:00</span>
+                                <span><span class="k">问题描述：</span>入院记录时间逻辑错误，原圆稳定问题错误</span>
+                                <span><span class="k">规则基础：</span>根据国家卫生健康委关于印发《病历书写基本规范》</span>
+                            </div>
+                            <div class="rp-defect-desc">修改建议：请该改该进入建议</div>
+                            <div class="rp-defect-actions">
+                                <button class="rp-da-btn">确认</button>
+                                <button class="rp-da-btn">忽略</button>
+                                <button class="rp-da-btn primary">加入报告</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 质检步骤 -->
+                    <div class="rp-tab-panel" id="rp-steps">
+                        <div style="display:flex; flex-direction:column; gap:8px; padding:4px 0;">
+                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
+                                <span style="flex:1;color:#374151;">文本解析</span>
+                                <span style="color:#10b981;font-size:12px;">已完成</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
+                                <span style="flex:1;color:#374151;">字段抽取</span>
+                                <span style="color:#10b981;font-size:12px;">已完成</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
+                                <span style="flex:1;color:#374151;">规则匹配</span>
+                                <span style="color:#10b981;font-size:12px;">已完成</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
+                                <span style="flex:1;color:#374151;">缺陷归类</span>
+                                <span style="color:#10b981;font-size:12px;">已完成</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
+                                <span style="flex:1;color:#374151;">报告生成</span>
+                                <span style="color:#10b981;font-size:12px;">已完成</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 患者画像 -->
+                    <div class="rp-tab-panel" id="rp-patient">
+                        <table class="rp-patient-table">
+                            <tr><td class="k">基本姓名</td><td class="v">王小明</td></tr>
+                            <tr><td class="k">文书存在情况</td><td class="v">5份文书</td></tr>
+                            <tr><td class="k">诊断内容描述</td><td class="v">呼吸医学、肺阻围</td></tr>
+                            <tr><td class="k">诊疗经过摘要</td><td class="v">第2页</td></tr>
+                            <tr><td class="k">关键字段</td><td class="v">--</td></tr>
+                            <tr><td class="k">缺陷内容</td><td class="v">入院记录时间逻辑错误</td></tr>
+                        </table>
+                        <button style="width:100%;margin-top:12px;padding:9px 0;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;">导出报告</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
 <script>
     document.querySelectorAll('.nav-item').forEach(el => {
         el.addEventListener('click', () => {
@@ -509,6 +849,24 @@ body {
     function switchSrcTab(el) {
         document.querySelectorAll('.src-tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
+    }
+
+    function showReport(show) {
+        document.getElementById('report-page').style.display = show ? 'block' : 'none';
+    }
+
+    function switchDocTab(el, panelId) {
+        document.querySelectorAll('.rp-doc-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.rp-doc-panel').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById(panelId).classList.add('active');
+    }
+
+    function switchRpTab(el, panelId) {
+        document.querySelectorAll('.rp-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.rp-tab-panel').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById(panelId).classList.add('active');
     }
 
     function startCheck() {
