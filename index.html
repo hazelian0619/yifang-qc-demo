@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>病历智能质检 - 千枢问医</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background:#f0f2f5; color:#1f2937; -webkit-font-smoothing:antialiased;
+    height:100vh; overflow:hidden;
+}
+
+/* ── 整体布局 ── */
+.layout { display:flex; height:100vh; }
+
+/* ── 顶部栏 ── */
+.topbar {
+    position:fixed; top:0; left:152px; right:0; height:44px;
+    background:#fff; border-bottom:1px solid #e5e7eb;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 20px; z-index:100;
+}
+.topbar-tab {
+    display:flex; align-items:center; gap:6px;
+    padding:6px 12px; border-radius:4px; font-size:13px;
+    background:#eff6ff; color:#2563eb; font-weight:500;
+}
+.topbar-tab .x { color:#9ca3af; font-size:11px; cursor:pointer; }
+.topbar-right { display:flex; align-items:center; gap:16px; font-size:13px; color:#6b7280; }
+.topbar-avatar {
+    width:26px; height:26px; border-radius:50%;
+    background:#2563eb; color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:600;
+}
+.topbar-user { display:flex; align-items:center; gap:6px; }
+
+/* ── 左侧导航 ── */
+.sidebar {
+    width:152px; flex-shrink:0; background:#fff;
+    border-right:1px solid #e5e7eb;
+    display:flex; flex-direction:column;
+    overflow-y:auto; padding-bottom:20px;
+}
+.logo {
+    height:44px; padding:0 16px;
+    display:flex; align-items:center; gap:8px;
+    border-bottom:1px solid #e5e7eb; flex-shrink:0;
+}
+.logo-icon {
+    width:26px; height:26px; border-radius:6px;
+    background:#2563eb; color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700;
+}
+.logo-name { font-size:13px; font-weight:600; color:#1e3a8a; line-height:1.2; }
+.logo-sub  { font-size:9px; color:#9ca3af; }
+
+.nav-group { padding:10px 0 2px; }
+.nav-label { padding:0 16px 4px; font-size:11px; color:#9ca3af; font-weight:500; }
+.nav-item {
+    padding:7px 16px; cursor:pointer;
+    display:flex; align-items:center; gap:7px;
+    font-size:13px; color:#4b5563;
+    border-left:2px solid transparent;
+    transition:all 0.15s;
+}
+.nav-item:hover { background:#f9fafb; color:#2563eb; }
+.nav-item.active { background:#eff6ff; color:#2563eb; font-weight:500; border-left-color:#2563eb; }
+.nav-item .ico { font-size:13px; width:16px; text-align:center; }
+
+/* ── 主区 ── */
+.main {
+    flex:1; display:flex; flex-direction:column;
+    margin-top:44px; overflow:hidden;
+}
+
+/* Banner */
+.banner {
+    background:#fff; padding:16px 16px;
+    display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid #e5e7eb; flex-shrink:0;
+}
+.banner-left { display:flex; align-items:center; gap:12px; }
+.banner-icon {
+    width:40px; height:40px; border-radius:8px;
+    background:#eff6ff; color:#2563eb;
+    display:flex; align-items:center; justify-content:center; font-size:18px;
+}
+.banner-title { font-size:18px; font-weight:600; display:flex; align-items:center; gap:8px; }
+.banner-badge {
+    padding:2px 8px; border-radius:10px; font-size:11px;
+    background:#dbeafe; color:#2563eb; font-weight:500;
+}
+.banner-sub { font-size:12px; color:#6b7280; margin-top:2px; }
+.start-btn {
+    padding:9px 20px; border-radius:6px; font-size:13px; font-weight:500;
+    background:#2563eb; color:#fff; border:none; cursor:pointer;
+    display:flex; align-items:center; gap:6px; transition:background 0.2s;
+}
+.start-btn:hover { background:#1d4ed8; }
+
+/* 内容双栏 */
+.body {
+    flex:1; display:flex; overflow:hidden;
+    padding:16px; gap:16px;
+}
+/* 左右卡片统一高度 */
+.col {
+    flex:1; background:#fff; border-radius:10px;
+    border:1px solid #e5e7eb; display:flex; flex-direction:column;
+    overflow:hidden;
+}
+.col-right { flex:1; }
+
+.col-header {
+    padding:16px 20px; font-size:14px; font-weight:600; color:#374151;
+    border-bottom:1px solid #f3f4f6; display:flex; align-items:center; gap:6px;
+    flex-shrink:0;
+}
+
+/* 左侧文本 */
+.text-area {
+    flex:1; width:100%; border:none; outline:none; resize:none;
+    padding:18px 20px; font-size:14px; line-height:1.9;
+    color:#374151; font-family:inherit; background:transparent;
+}
+.text-area::placeholder { color:#9ca3af; }
+
+/* 识别信息（旧样式，被新样式覆盖） */
+.info-strip-title strong { color:#374151; }
+.info-cell span { color:#9ca3af; }
+
+/* 右侧 - 等待态 */
+.waiting-state {
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:12px;
+    color:#6b7280;
+}
+.waiting-icon {
+    width:64px; height:64px; border-radius:14px;
+    background:#eff6ff; color:#2563eb;
+    display:flex; align-items:center; justify-content:center; font-size:28px;
+}
+.waiting-title { font-size:15px; font-weight:600; color:#374151; }
+.waiting-sub { font-size:12px; color:#9ca3af; text-align:center; max-width:220px; line-height:1.6; }
+
+/* 右侧 - 质检中/完成态 */
+.check-state { flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:20px; gap:14px; }
+
+/* 上方两卡并排，等高拉伸 */
+.top-cards { display:flex; gap:14px; align-items:stretch; }
+.sub-card {
+    flex:1; background:#fff; border:1px solid #e5e7eb;
+    border-radius:8px; padding:16px 18px;
+    display:flex; flex-direction:column;
+}
+.sub-card-title { font-size:14px; font-weight:600; color:#111827; margin-bottom:12px; flex-shrink:0; }
+.rule-block { flex:1; display:flex; flex-direction:column; justify-content:space-between; }
+.flow-list { flex:1; display:flex; flex-direction:column; justify-content:space-between; }
+
+/* 规则行 */
+.rule-block { flex:1; display:flex; flex-direction:column; justify-content:space-between; gap:0; }
+.rule-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:9px 0; font-size:12px; border-bottom:1px solid #f9fafb; flex:1;
+}
+.rule-row:last-child { border-bottom:none; }
+.rule-k { color:#6b7280; }
+.rule-v { color:#111827; font-weight:500; text-align:right; max-width:55%; font-size:12px; }
+.rule-v.link { color:#2563eb; cursor:pointer; }
+.toggle {
+    position:relative; width:32px; height:18px;
+    background:#d1d5db; border-radius:9px; cursor:pointer; transition:background 0.2s;
+}
+.toggle.on { background:#2563eb; }
+.toggle::after {
+    content:''; position:absolute; width:14px; height:14px;
+    background:#fff; border-radius:50%; top:2px; left:2px;
+    transition:left 0.2s; box-shadow:0 1px 2px rgba(0,0,0,.15);
+}
+.toggle.on::after { left:16px; }
+
+/* 流程步骤 */
+.flow-list { flex:1; display:flex; flex-direction:column; justify-content:space-between; }
+.flow-item {
+    display:flex; align-items:center; gap:10px;
+    padding:6px 0; position:relative; font-size:12px; flex:1;
+}
+.flow-item:not(:last-child)::after {
+    content:''; position:absolute; left:9px; top:28px;
+    width:2px; height:calc(100% - 8px); background:#e5e7eb; z-index:0;
+}
+.flow-item.done:not(:last-child)::after { background:#10b981; }
+.flow-dot {
+    width:20px; height:20px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; position:relative; z-index:1;
+}
+.flow-dot.pending { background:#f3f4f6; color:#d1d5db; border:1.5px solid #e5e7eb; }
+.flow-dot.running { background:#3b82f6; color:#fff; animation:pulse 1.2s infinite; }
+.flow-dot.done    { background:#10b981; color:#fff; }
+@keyframes pulse {
+    0%,100% { box-shadow:0 0 0 0 rgba(59,130,246,.4); }
+    50%      { box-shadow:0 0 0 5px rgba(59,130,246,0); }
+}
+.flow-label { flex:1; color:#374151; }
+.flow-badge {
+    padding:1px 7px; border-radius:3px; font-size:11px;
+}
+.flow-badge.waiting { background:#f3f4f6; color:#9ca3af; }
+.flow-badge.running { background:#dbeafe; color:#2563eb; }
+.flow-badge.done    { background:#f0fdf4; color:#16a34a; }
+
+/* 结果摘要 */
+.result-card {
+    background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:18px;
+}
+.result-card-title { font-size:14px; font-weight:600; color:#111827; margin-bottom:14px; }
+.result-score-row { display:flex; gap:10px; margin-bottom:14px; }
+.score-box {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:14px 8px; border-radius:8px; min-width:72px;
+}
+.score-box.blue { background:#2563eb; color:#fff; flex:1.3; }
+.score-box.gray { background:#f3f4f6; color:#374151; flex:1.3; }
+.score-box.white { background:#fff; border:1px solid #e5e7eb; color:#374151; flex:1; }
+.score-box.pink  { background:#fef2f2; color:#ef4444; flex:1; }
+.score-num { font-size:26px; font-weight:700; line-height:1.1; }
+.score-lbl { font-size:11px; margin-top:4px; opacity:.85; }
+.score-box.white .score-lbl { color:#9ca3af; }
+.score-box.pink .score-lbl  { color:#ef4444; opacity:.7; }
+
+.issue-section { margin-bottom:12px; }
+.issue-section-title { font-size:13px; color:#374151; margin-bottom:8px; font-weight:500; }
+.issue-tags { display:flex; flex-wrap:wrap; gap:7px; }
+.issue-tag {
+    padding:5px 12px; border-radius:4px; font-size:12px;
+    background:#f3f4f6; color:#4b5563;
+}
+.ops-section-title { font-size:13px; color:#374151; margin-bottom:8px; font-weight:500; }
+.act-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.act-btn {
+    padding:10px 0; border-radius:6px; font-size:13px; font-weight:500;
+    cursor:pointer; text-align:center; transition:all .15s;
+    background:#fff; color:#374151; border:1px solid #d1d5db;
+}
+.act-btn:hover { background:#f9fafb; border-color:#9ca3af; }
+
+/* 分组标题 */
+.group-title { font-size:11px; font-weight:600; color:#9ca3af; text-transform:uppercase; letter-spacing:.5px; }
+
+/* Tab 来源选择 */
+.src-tabs {
+    display:flex; gap:0; border-bottom:1px solid #e5e7eb; padding:0 20px; flex-shrink:0;
+}
+.src-tab {
+    padding:11px 16px; font-size:13px; color:#6b7280; cursor:pointer;
+    border-bottom:2px solid transparent; margin-bottom:-1px;
+    transition:all 0.15s; display:flex; align-items:center; gap:6px; white-space:nowrap;
+}
+.src-tab:hover { color:#2563eb; }
+.src-tab.active { color:#2563eb; border-bottom-color:#2563eb; font-weight:500; }
+.src-tab .coming { padding:1px 6px; border-radius:3px; font-size:11px; background:#fef3c7; color:#b45309; }
+
+/* 识别信息格子 */
+.info-strip {
+    border-top:1px solid #f0f0f0; padding:16px 20px; background:#f8fafc; flex-shrink:0;
+}
+.info-strip-header {
+    display:flex; align-items:center; gap:8px; margin-bottom:12px;
+}
+.info-strip-title { font-size:13px; font-weight:600; color:#374151; }
+.info-strip-hint { font-size:12px; color:#9ca3af; }
+.info-cells {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+}
+.info-cell {
+    padding:8px 12px; background:#fff; border-radius:6px;
+    border:1px solid #e5e7eb; font-size:13px; color:#374151;
+    display:flex; align-items:center; gap:4px;
+}
+.info-cell .lbl { color:#9ca3af; font-size:12px; white-space:nowrap; }
+.info-cell .val { color:#111827; font-weight:500; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+    <!-- 左导航 -->
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">S</div>
+            <div><div class="logo-name">千枢问医</div><div class="logo-sub">QIAN SHU WEN YI</div></div>
+        </div>
+        <div class="nav-group">
+            <div class="nav-label">门诊</div>
+            <div class="nav-item"><span class="ico">👤</span>患者管理</div>
+            <div class="nav-item"><span class="ico">⚡</span>快速诊断</div>
+        </div>
+        <div class="nav-group">
+            <div class="nav-label">住院</div>
+            <div class="nav-item"><span class="ico">📋</span>入院诊断</div>
+            <div class="nav-item"><span class="ico">👤</span>患者管理</div>
+            <div class="nav-item"><span class="ico">📄</span>文书生成</div>
+        </div>
+        <div class="nav-group">
+            <div class="nav-label">病历管理</div>
+            <div class="nav-item active"><span class="ico">☰</span>病历质检</div>
+            <div class="nav-item"><span class="ico">🕐</span>质检历史</div>
+        </div>
+        <div class="nav-group">
+            <div class="nav-label">知识库</div>
+            <div class="nav-item"><span class="ico">📖</span>药典</div>
+            <div class="nav-item"><span class="ico">📊</span>临床决策</div>
+            <div class="nav-item"><span class="ico">📋</span>临床指南</div>
+        </div>
+        <div class="nav-group">
+            <div class="nav-label">工具库</div>
+            <div class="nav-item"><span class="ico">💬</span>智能聊天</div>
+            <div class="nav-item"><span class="ico">🎙</span>语音转文字</div>
+            <div class="nav-item"><span class="ico">📊</span>病历分析</div>
+            <div class="nav-item"><span class="ico">📋</span>病历模板</div>
+            <div class="nav-item"><span class="ico">🏥</span>住院病案</div>
+        </div>
+        <div class="nav-group">
+            <div class="nav-label">系统</div>
+            <div class="nav-item"><span class="ico">⚙</span>助手设置</div>
+        </div>
+    </div>
+
+    <!-- 顶部栏 -->
+    <div class="topbar">
+        <div class="topbar-tab">☰ 病历质检 <span class="x">✕</span></div>
+        <div class="topbar-right">
+            <span>↓ 下载 PC 版</span>
+            <div class="topbar-user">
+                <div class="topbar-avatar">刘</div>
+                <span>刘伟萍</span>
+                <span style="color:#9ca3af;font-size:11px;">产科</span>
+                <span style="color:#9ca3af;">→</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主区 -->
+    <div class="main">
+        <!-- Banner -->
+        <div class="banner">
+            <div class="banner-left">
+                <div class="banner-icon">☰</div>
+                <div>
+                    <div class="banner-title">
+                        病历智能打分质检
+                        <span class="banner-badge">16阶检查</span>
+                    </div>
+                    <div class="banner-sub">多维度16阶智能打分，一票否决规则校验与合规深度审查系统</div>
+                </div>
+            </div>
+            <button class="start-btn" onclick="startCheck()">▶ 开始打分质检</button>
+        </div>
+
+        <!-- 双栏主体 -->
+        <div class="body">
+            <!-- 左：文本输入 -->
+            <div class="col" style="flex:1.05;">
+                <div class="col-header">待检病历文本内容</div>
+                <div class="src-tabs">
+                    <div class="src-tab active" onclick="switchSrcTab(this)">粘贴文本</div>
+                    <div class="src-tab" onclick="switchSrcTab(this)">上传文件</div>
+                    <div class="src-tab" style="cursor:default;color:#d1d5db;">从 HIS 选择 <span class="coming">即将支持</span></div>
+                </div>
+                <textarea class="text-area" id="medical-text"
+                    placeholder="在此粘贴或输入待检病历内容..."></textarea>
+                <div class="info-strip" id="info-strip" style="display:none;">
+                    <div class="info-strip-header">
+                        <span class="info-strip-title">已识别信息</span>
+                        <span class="info-strip-hint">自动识别输入并提取病历关键字段</span>
+                    </div>
+                    <div class="info-cells">
+                        <div class="info-cell"><span class="lbl">患者姓名：</span><span class="val">张三</span></div>
+                        <div class="info-cell"><span class="lbl">性别年龄：</span><span class="val">男 / 45岁</span></div>
+                        <div class="info-cell"><span class="lbl">住院号：</span><span class="val">H12345</span></div>
+                        <div class="info-cell"><span class="lbl">科室：</span><span class="val">呼吸内科</span></div>
+                        <div class="info-cell"><span class="lbl">文书类型：</span><span class="val">入院记录</span></div>
+                        <div class="info-cell"><span class="lbl">数据来源：</span><span class="val">粘贴文本</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右：质检卡片 -->
+            <div class="col col-right">
+                <!-- 等待态 -->
+                <div class="waiting-state" id="waiting-state">
+                    <div class="waiting-icon">☰</div>
+                    <div class="waiting-title">准备病历多维打分质检</div>
+                    <div class="waiting-sub">请在左侧输入病历文本，点击右上角"开始打分质检"开启全维度16阶段合规打分与逻辑交叉校验。</div>
+                </div>
+
+                <!-- 质检运行态 -->
+                <div class="check-state" id="check-state" style="display:none;">
+
+                    <!-- 上方：规则卡 + 流程卡 并排 -->
+                    <div class="top-cards">
+                        <!-- 质检规则卡 -->
+                        <div class="sub-card">
+                            <div class="sub-card-title">质检规则卡</div>
+                            <div class="rule-block">
+                                <div class="rule-row">
+                                    <span class="rule-k">当前规则库</span>
+                                    <span class="rule-v link">住院病历规则库 ›</span>
+                                </div>
+                                <div class="rule-row">
+                                    <span class="rule-k">质检模式</span>
+                                    <span class="rule-v">质检模式</span>
+                                </div>
+                                <div class="rule-row">
+                                    <span class="rule-k">检查范围</span>
+                                    <span class="rule-v">未来与检查范围</span>
+                                </div>
+                                <div class="rule-row">
+                                    <span class="rule-k">规则版本</span>
+                                    <span class="rule-v">1.0</span>
+                                </div>
+                                <div class="rule-row">
+                                    <span class="rule-k">是否启用一票否决 ⓘ</span>
+                                    <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 质检流程卡 -->
+                        <div class="sub-card">
+                            <div class="sub-card-title">质检流程卡</div>
+                            <div class="flow-list" id="flow-list">
+                                <div class="flow-item"><div class="flow-dot pending"></div><div class="flow-label">文本解析</div><div class="flow-badge waiting">已状态</div></div>
+                                <div class="flow-item"><div class="flow-dot pending"></div><div class="flow-label">字段抽取</div><div class="flow-badge waiting">已状态</div></div>
+                                <div class="flow-item"><div class="flow-dot pending"></div><div class="flow-label">规则匹配</div><div class="flow-badge waiting"></div></div>
+                                <div class="flow-item"><div class="flow-dot pending"></div><div class="flow-label">缺陷归类</div><div class="flow-badge waiting">已状态</div></div>
+                                <div class="flow-item"><div class="flow-dot pending"></div><div class="flow-label">报告生成</div><div class="flow-badge waiting">已状态</div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 结果摘要卡（质检完成后显示） -->
+                    <div id="result-section" style="display:none;">
+                        <div class="result-card">
+                            <div class="result-card-title">结果摘要卡</div>
+                            <div class="result-score-row">
+                                <div class="score-box blue">
+                                    <div class="score-num">60.9</div>
+                                    <div class="score-lbl">总分分数</div>
+                                </div>
+                                <div class="score-box gray">
+                                    <div class="score-num">A/B/C</div>
+                                    <div class="score-lbl">fc等级</div>
+                                </div>
+                                <div class="score-box white">
+                                    <div class="score-num">0</div>
+                                    <div class="score-lbl">缺陷总数</div>
+                                </div>
+                                <div class="score-box pink">
+                                    <div class="score-num">2</div>
+                                    <div class="score-lbl">严重缺陷</div>
+                                </div>
+                                <div class="score-box white">
+                                    <div class="score-num">1</div>
+                                    <div class="score-lbl">一票否决</div>
+                                </div>
+                            </div>
+
+                            <div class="issue-section">
+                                <div class="issue-section-title">主要问题类型</div>
+                                <div class="issue-tags">
+                                    <span class="issue-tag">病案首页缺失</span>
+                                    <span class="issue-tag">签名缺失</span>
+                                    <span class="issue-tag">文书超时</span>
+                                    <span class="issue-tag">文书超时</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="ops-section-title">操作区</div>
+                                <div class="act-grid">
+                                    <button class="act-btn fill" onclick="showReport(true)">查看详情</button>
+                                    <button class="act-btn fill">保存至质检历史</button>
+                                    <button class="act-btn fill">导出报告</button>
+                                    <button class="act-btn fill">重新质检</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════ 报告详情页（覆盖层） ══════ -->
+<div id="report-page" style="display:none; position:fixed; top:44px; left:152px; right:0; bottom:0; background:#f0f2f5; overflow-y:auto; z-index:200;">
+<style>
+.rp { padding:16px; height:100%; display:flex; flex-direction:column; }
+
+/* 报告头 */
+.rp-header {
+    background:#fff; border-radius:8px; padding:16px 20px;
+    margin-bottom:14px; flex-shrink:0;
+}
+.rp-header-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; }
+.rp-title { font-size:20px; font-weight:600; color:#111827; }
+.rp-btns { display:flex; gap:8px; flex-shrink:0; }
+.rp-btn { padding:8px 16px; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; border:none; transition:all .15s; }
+.rp-btn.primary { background:#2563eb; color:#fff; }
+.rp-btn.primary:hover { background:#1d4ed8; }
+.rp-btn.secondary { background:#fff; color:#374151; border:1px solid #d1d5db; }
+.rp-btn.secondary:hover { background:#f9fafb; }
+.rp-meta { display:flex; flex-wrap:wrap; gap:0; font-size:13px; color:#374151; }
+.rp-meta-item { margin-right:32px; margin-bottom:4px; }
+.rp-meta-item .lbl { color:#9ca3af; margin-right:6px; }
+.rp-meta-item .val { color:#111827; font-weight:500; }
+
+/* 主体两栏 */
+.rp-body {
+    flex:1; display:flex; gap:14px; min-height:0;
+}
+
+/* 左：病历原文 */
+.rp-left {
+    flex:1; background:#fff; border-radius:8px; border:1px solid #e5e7eb;
+    display:flex; flex-direction:column; overflow:hidden;
+}
+.rp-doc-header { padding:14px 20px; font-size:14px; font-weight:600; color:#111827; border-bottom:1px solid #f3f4f6; flex-shrink:0; }
+.rp-doc-tabs {
+    display:flex; border-bottom:1px solid #e5e7eb; padding:0 20px; flex-shrink:0;
+}
+.rp-doc-tab {
+    padding:10px 14px; font-size:13px; color:#6b7280; cursor:pointer;
+    border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .15s; white-space:nowrap;
+}
+.rp-doc-tab:hover { color:#2563eb; }
+.rp-doc-tab.active { color:#2563eb; border-bottom-color:#2563eb; font-weight:500; }
+.rp-doc-content { flex:1; overflow-y:auto; padding:20px; }
+.rp-doc-panel { display:none; font-size:13px; line-height:2; color:#374151; }
+.rp-doc-panel.active { display:block; }
+.rp-doc-panel .location {
+    font-size:12px; color:#6b7280; padding:6px 12px;
+    background:#f8fafc; border-radius:4px; margin-bottom:16px;
+    border-left:3px solid #e5e7eb;
+}
+.rp-doc-panel p { margin-bottom:10px; }
+.rp-doc-panel h4 { font-size:13px; font-weight:600; margin:16px 0 6px; color:#111827; }
+
+/* 右：质检解释区 */
+.rp-right {
+    width:520px; flex-shrink:0; display:flex; flex-direction:column; gap:12px; overflow-y:auto;
+}
+
+/* 成分摘要卡 */
+.rp-summary-card {
+    background:#fff; border-radius:8px; border:1px solid #e5e7eb; padding:16px 18px;
+}
+.rp-summary-title { font-size:14px; font-weight:600; color:#111827; margin-bottom:12px; }
+.rp-score-strip {
+    display:flex; gap:0; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin-bottom:14px;
+}
+.rp-score-col {
+    flex:1; padding:10px 4px; text-align:center; border-right:1px solid #e5e7eb;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+.rp-score-col:last-child { border-right:none; }
+.rp-score-col .num {
+    font-size:20px; font-weight:700; color:#111827; line-height:1.2;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;
+}
+.rp-score-col .num.green { color:#10b981; }
+.rp-score-col .num.orange { color:#f59e0b; }
+.rp-score-col .num.red { color:#ef4444; }
+.rp-score-col .lbl { font-size:11px; color:#9ca3af; margin-top:3px; white-space:nowrap; }
+
+/* 内容 Tab */
+.rp-tabs { display:flex; border-bottom:1px solid #e5e7eb; margin-bottom:0; }
+.rp-tab {
+    padding:10px 14px; font-size:13px; color:#6b7280; cursor:pointer;
+    border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .15s; white-space:nowrap;
+}
+.rp-tab:hover { color:#2563eb; }
+.rp-tab.active { color:#2563eb; border-bottom-color:#2563eb; font-weight:500; }
+.rp-tab-panels { padding:14px 0; }
+.rp-tab-panel { display:none; }
+.rp-tab-panel.active { display:block; }
+
+/* 缺陷建议列表 */
+.rp-defect-item {
+    border:1px solid #e5e7eb; border-radius:6px; padding:14px;
+    margin-bottom:10px; background:#fff;
+}
+.rp-defect-item:last-child { margin-bottom:0; }
+.rp-defect-row1 { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+.rp-defect-name { font-size:13px; font-weight:600; color:#111827; }
+.rp-defect-score { font-size:13px; font-weight:600; color:#ef4444; }
+.rp-defect-tags { display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
+.rp-dtag { padding:2px 8px; border-radius:3px; font-size:11px; }
+.rp-dtag.type { background:#eff6ff; color:#2563eb; }
+.rp-dtag.risk { background:#fef3c7; color:#b45309; }
+.rp-dtag.risk-high { background:#fef2f2; color:#ef4444; }
+.rp-defect-info { font-size:12px; color:#6b7280; display:flex; flex-direction:column; gap:4px; margin-bottom:8px; }
+.rp-defect-info span { display:flex; gap:6px; }
+.rp-defect-info .k { color:#9ca3af; white-space:nowrap; }
+.rp-defect-desc { font-size:12px; color:#374151; background:#f8fafc; border-radius:4px; padding:8px 10px; margin-bottom:8px; line-height:1.7; }
+.rp-defect-actions { display:flex; gap:6px; }
+.rp-da-btn {
+    padding:5px 12px; border-radius:4px; font-size:12px; cursor:pointer;
+    border:1px solid #d1d5db; background:#fff; color:#374151; transition:all .15s;
+}
+.rp-da-btn:hover { background:#f9fafb; }
+.rp-da-btn.primary { background:#2563eb; color:#fff; border-color:#2563eb; }
+.rp-da-btn.primary:hover { background:#1d4ed8; }
+
+/* 患者画像表格 */
+.rp-patient-table { width:100%; font-size:13px; }
+.rp-patient-table tr td { padding:7px 0; border-bottom:1px solid #f3f4f6; }
+.rp-patient-table tr:last-child td { border-bottom:none; }
+.rp-patient-table .k { color:#9ca3af; width:40%; }
+.rp-patient-table .v { color:#111827; font-weight:500; }
+</style>
+
+<div class="rp">
+    <!-- 报告头 -->
+    <div class="rp-header">
+        <div class="rp-header-top">
+            <div class="rp-title">病历智能质控评估报告</div>
+            <div class="rp-btns">
+                <button class="rp-btn secondary" onclick="showReport(false)">返回列表</button>
+                <button class="rp-btn primary">重新质检</button>
+                <button class="rp-btn primary">导出报告</button>
+            </div>
+        </div>
+        <div class="rp-meta">
+            <div class="rp-meta-item"><span class="lbl">患者名称</span><span class="val">王小明</span></div>
+            <div class="rp-meta-item"><span class="lbl">入院号</span><span class="val">123456</span></div>
+            <div class="rp-meta-item"><span class="lbl">部门</span><span class="val">呼吸医学</span></div>
+            <div class="rp-meta-item"><span class="lbl">上级医生</span><span class="val">张生</span></div>
+            <div class="rp-meta-item"><span class="lbl">检查时间</span><span class="val">2026-06-09 10:00</span></div>
+            <div class="rp-meta-item"><span class="lbl">成分等级</span><span class="val">85/A</span></div>
+        </div>
+    </div>
+
+    <!-- 主体两栏 -->
+    <div class="rp-body">
+        <!-- 左：病历原文 -->
+        <div class="rp-left">
+            <div class="rp-doc-header">待检病历原始文本</div>
+            <div class="rp-doc-tabs">
+                <div class="rp-doc-tab active" onclick="switchDocTab(this,'doc-1')">病案首页</div>
+                <div class="rp-doc-tab" onclick="switchDocTab(this,'doc-2')">入院记录</div>
+                <div class="rp-doc-tab" onclick="switchDocTab(this,'doc-3')">首次病程</div>
+                <div class="rp-doc-tab" onclick="switchDocTab(this,'doc-4')">日常病程</div>
+                <div class="rp-doc-tab" onclick="switchDocTab(this,'doc-5')">出院记录</div>
+            </div>
+            <div class="rp-doc-content">
+                <div class="rp-doc-panel active" id="doc-1">
+                    <div class="location">当前定位：病案首页-基本信息</div>
+                    <p><strong>患者名称</strong>：王小明</p>
+                    <p><strong>入院号</strong>：123456</p>
+                    <p><strong>部门</strong>：呼吸医学</p>
+                    <h4>基本情况</h4>
+                    <p>患者王小明，男，52岁，因反复咳嗽咳痰5年，加重伴喘息1周入院。既往有慢性阻塞性肺病病史，长期吸烟史30年。</p>
+                    <p>入院时生命体征：体温36.8℃，脉搏92次/分，呼吸20次/分，血压135/85mmHg，血氧饱和度91%。</p>
+                </div>
+                <div class="rp-doc-panel" id="doc-2">
+                    <div class="location">当前定位：入院记录-主诉与现病史</div>
+                    <h4>主诉</h4>
+                    <p>反复咳嗽咳痰5年，加重伴喘息1周。</p>
+                    <h4>现病史</h4>
+                    <p>患者5年前开始出现咳嗽咳痰，多为白色黏痰，秋冬季节加重，曾多次就诊于当地医院，诊断为慢性支气管炎，予抗感染及对症治疗后好转。</p>
+                    <p>1周前受凉后咳嗽加重，痰量增多，颜色变黄，伴有喘息、胸闷，活动后气短明显，夜间不能平卧。</p>
+                    <p>入院记录时间逻辑错误，推进：-5分，原脱编则11:00。</p>
+                </div>
+                <div class="rp-doc-panel" id="doc-3">
+                    <div class="location">当前定位：首次病程-病情评估</div>
+                    <h4>首次病程记录</h4>
+                    <p>患者入院后完善相关检查，胸部CT示双肺气肿改变，右下肺感染。肺功能检查提示中度阻塞性通气功能障碍。</p>
+                    <p>血常规：白细胞12.3×10⁹/L，中性粒细胞85%，C反应蛋白68mg/L。</p>
+                    <p>初步诊断：慢性阻塞性肺病急性加重，肺部感染。</p>
+                </div>
+                <div class="rp-doc-panel" id="doc-4">
+                    <div class="location">当前定位：日常病程记录</div>
+                    <h4>2026-06-07 病程记录</h4>
+                    <p>患者经抗感染、解痉平喘、化痰治疗后，咳嗽咳痰有所减轻，喘息略有缓解，仍有活动后气短。</p>
+                    <p>体格检查：双肺呼吸音粗，可闻及散在湿性啰音及哮鸣音。继续当前治疗方案。</p>
+                    <h4>2026-06-08 病程记录</h4>
+                    <p>患者病情较前好转，咳嗽减少，痰液转为白色，喘息明显改善，血氧饱和度升至96%。</p>
+                </div>
+                <div class="rp-doc-panel" id="doc-5">
+                    <div class="location">当前定位：出院记录</div>
+                    <h4>出院小结</h4>
+                    <p>患者经10天住院治疗，病情明显好转，咳嗽咳痰减轻，喘息缓解，血氧饱和度维持在96%以上，达到出院标准。</p>
+                    <h4>出院医嘱</h4>
+                    <p>1. 继续口服抗生素5天；2. 沙美特罗/丙酸氟替卡松吸入剂长期维持；3. 戒烟；4. 门诊随访。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右：质检解释区 -->
+        <div class="rp-right">
+            <!-- 成分摘要 -->
+            <div class="rp-summary-card">
+                <div class="rp-score-strip">
+                    <div class="rp-score-col">
+                        <div class="num green">85</div>
+                        <div class="lbl">成分</div>
+                    </div>
+                    <div class="rp-score-col">
+                        <div class="num">A</div>
+                        <div class="lbl">等级</div>
+                    </div>
+                    <div class="rp-score-col">
+                        <div class="num orange">中危</div>
+                        <div class="lbl">风险结论</div>
+                    </div>
+                    <div class="rp-score-col">
+                        <div class="num">无</div>
+                        <div class="lbl">一票否决提示</div>
+                    </div>
+                    <div class="rp-score-col">
+                        <div class="num">15</div>
+                        <div class="lbl">总缺陷</div>
+                    </div>
+                    <div class="rp-score-col">
+                        <div class="num red">2</div>
+                        <div class="lbl">严重缺陷</div>
+                    </div>
+                </div>
+
+                <!-- 内容 Tab -->
+                <div class="rp-tabs">
+                    <div class="rp-tab active" onclick="switchRpTab(this,'rp-defects')">缺陷建议</div>
+                    <div class="rp-tab" onclick="switchRpTab(this,'rp-steps')">质检步骤</div>
+                    <div class="rp-tab" onclick="switchRpTab(this,'rp-patient')">患者画像</div>
+                </div>
+
+                <div class="rp-tab-panels">
+                    <!-- 缺陷建议 -->
+                    <div class="rp-tab-panel active" id="rp-defects">
+                        <div class="rp-defect-item">
+                            <div class="rp-defect-row1">
+                                <div class="rp-defect-name">缺陷名称：入院记录时间逻辑错误</div>
+                                <div class="rp-defect-score">扣扣：-5分</div>
+                            </div>
+                            <div class="rp-defect-tags">
+                                <span class="rp-dtag type">缺陷类型：导抗病</span>
+                                <span class="rp-dtag risk">严重性：中风险</span>
+                            </div>
+                            <div class="rp-defect-info">
+                                <span><span class="k">问题位置：</span>正院记录时间：10分，原脱编则：10:00</span>
+                                <span><span class="k">问题描述：</span>入院记录时间逻辑错误，无流转错误，医生产生症时赢的错误</span>
+                                <span><span class="k">规则基础：</span>根据国家卫生健康委关于印发《病历书写基本规范》</span>
+                            </div>
+                            <div class="rp-defect-desc">修改建议：请将改症该词，改发病能更精稿度的建议。</div>
+                            <div class="rp-defect-actions">
+                                <button class="rp-da-btn">确认</button>
+                                <button class="rp-da-btn">忽略</button>
+                                <button class="rp-da-btn primary">加入报告</button>
+                            </div>
+                        </div>
+                        <div class="rp-defect-item">
+                            <div class="rp-defect-row1">
+                                <div class="rp-defect-name">缺陷名称：入院记录时间逻辑错误</div>
+                                <div class="rp-defect-score">扣扣：-5分</div>
+                            </div>
+                            <div class="rp-defect-tags">
+                                <span class="rp-dtag type">缺陷类型：导椿病</span>
+                                <span class="rp-dtag risk">严重性：中风险</span>
+                            </div>
+                            <div class="rp-defect-info">
+                                <span><span class="k">问题位置：</span>推进：-5分，原脱编则11:00</span>
+                                <span><span class="k">问题描述：</span>入院记录时间逻辑错误，原圆稳定问题错误</span>
+                                <span><span class="k">规则基础：</span>根据国家卫生健康委关于印发《病历书写基本规范》</span>
+                            </div>
+                            <div class="rp-defect-desc">修改建议：请该改该进入建议</div>
+                            <div class="rp-defect-actions">
+                                <button class="rp-da-btn">确认</button>
+                                <button class="rp-da-btn">忽略</button>
+                                <button class="rp-da-btn primary">加入报告</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 质检步骤 -->
+                    <div class="rp-tab-panel" id="rp-steps">
+                        <div style="display:flex; flex-direction:column; gap:8px; padding:4px 0;">
+                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
+                                <span style="flex:1;color:#374151;">文本解析</span>
+                                <span style="color:#10b981;font-size:12px;">已完成</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
+                                <span style="flex:1;color:#374151;">字段抽取</span>
+                                <span style="color:#10b981;font-size:12px;">已完成</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
+                                <span style="flex:1;color:#374151;">规则匹配</span>
+                                <span style="color:#10b981;font-size:12px;">已完成</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
+                                <span style="flex:1;color:#374151;">缺陷归类</span>
+                                <span style="color:#10b981;font-size:12px;">已完成</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
+                                <span style="flex:1;color:#374151;">报告生成</span>
+                                <span style="color:#10b981;font-size:12px;">已完成</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 患者画像 -->
+                    <div class="rp-tab-panel" id="rp-patient">
+                        <table class="rp-patient-table">
+                            <tr><td class="k">基本姓名</td><td class="v">王小明</td></tr>
+                            <tr><td class="k">文书存在情况</td><td class="v">5份文书</td></tr>
+                            <tr><td class="k">诊断内容描述</td><td class="v">呼吸医学、肺阻围</td></tr>
+                            <tr><td class="k">诊疗经过摘要</td><td class="v">第2页</td></tr>
+                            <tr><td class="k">关键字段</td><td class="v">--</td></tr>
+                            <tr><td class="k">缺陷内容</td><td class="v">入院记录时间逻辑错误</td></tr>
+                        </table>
+                        <button style="width:100%;margin-top:12px;padding:9px 0;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;">导出报告</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    document.querySelectorAll('.nav-item').forEach(el => {
+        el.addEventListener('click', () => {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+        });
+    });
+
+    function switchSrcTab(el) {
+        document.querySelectorAll('.src-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function showReport(show) {
+        document.getElementById('report-page').style.display = show ? 'block' : 'none';
+    }
+
+    function switchDocTab(el, panelId) {
+        document.querySelectorAll('.rp-doc-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.rp-doc-panel').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById(panelId).classList.add('active');
+    }
+
+    function switchRpTab(el, panelId) {
+        document.querySelectorAll('.rp-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.rp-tab-panel').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById(panelId).classList.add('active');
+    }
+
+    function startCheck() {
+        const text = document.getElementById('medical-text').value.trim();
+        if (!text) { alert('请先输入病历文本'); return; }
+
+        // 显示识别信息
+        document.getElementById('info-strip').style.display = 'block';
+
+        // 切换右侧为运行态
+        document.getElementById('waiting-state').style.display = 'none';
+        document.getElementById('check-state').style.display = 'flex';
+        document.getElementById('result-section').style.display = 'none';
+
+        const items  = document.querySelectorAll('#flow-list .flow-item');
+        const dots   = document.querySelectorAll('#flow-list .flow-dot');
+        const badges = document.querySelectorAll('#flow-list .flow-badge');
+
+        // 重置
+        dots.forEach((d,i) => { d.className='flow-dot pending'; d.textContent=''; items[i].classList.remove('done'); });
+        badges.forEach(b => { b.className='flow-badge waiting'; b.textContent='等待中'; });
+
+        let i = 0;
+        function runStep() {
+            if (i >= items.length) return;
+            dots[i].className = 'flow-dot running'; dots[i].textContent = '⟳';
+            badges[i].className = 'flow-badge running'; badges[i].textContent = '进行中';
+            const cur = i;
+            setTimeout(() => {
+                dots[cur].className = 'flow-dot done'; dots[cur].textContent = '✓';
+                items[cur].classList.add('done');
+                badges[cur].className = 'flow-badge done'; badges[cur].textContent = '已完成';
+                i++;
+                if (i < items.length) setTimeout(runStep, 300);
+                else setTimeout(() => { document.getElementById('result-section').style.display = 'block'; }, 400);
+            }, 900);
+        }
+        setTimeout(runStep, 200);
+    }
+</script>
+</body>
+</html>
