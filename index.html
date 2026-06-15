@@ -499,6 +499,259 @@ body {
     </div>
 </div>
 
+<!-- ══════ 智控面板页（覆盖层） ══════ -->
+<div id="dashboard-page" style="display:none; position:fixed; top:44px; left:152px; right:0; bottom:0; background:#f0f2f5; overflow-y:auto; z-index:200;">
+<style>
+.db { padding:16px; display:flex; flex-direction:column; gap:14px; }
+.db-header { background:#fff; border-radius:10px; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; border:1px solid #e5e7eb; }
+.db-title { font-size:18px; font-weight:600; color:#111827; display:flex; align-items:center; gap:8px; }
+.db-sub { font-size:12px; color:#6b7280; margin-top:3px; }
+.db-filter { display:flex; gap:8px; }
+.db-filter-btn { padding:6px 14px; border-radius:6px; font-size:13px; cursor:pointer; border:1px solid #d1d5db; background:#fff; color:#4b5563; transition:all .15s; }
+.db-filter-btn.active { background:#2563eb; color:#fff; border-color:#2563eb; }
+.db-kpi-row { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+.db-kpi { background:#fff; border-radius:10px; border:1px solid #e5e7eb; padding:16px 18px; display:flex; flex-direction:column; gap:6px; }
+.db-kpi-label { font-size:12px; color:#6b7280; }
+.db-kpi-val { font-size:26px; font-weight:700; color:#111827; line-height:1.1; }
+.db-kpi-val.blue { color:#2563eb; }
+.db-kpi-val.green { color:#16a34a; }
+.db-kpi-val.red { color:#ef4444; }
+.db-kpi-val.orange { color:#d97706; }
+.db-kpi-trend { font-size:11px; color:#9ca3af; }
+.db-kpi-trend.up { color:#16a34a; }
+.db-kpi-trend.down { color:#ef4444; }
+.db-row2 { display:grid; grid-template-columns:1.6fr 1fr; gap:14px; }
+.db-row3 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.db-card { background:#fff; border-radius:10px; border:1px solid #e5e7eb; padding:16px 18px; }
+.db-card-title { font-size:14px; font-weight:600; color:#374151; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; }
+.db-card-title span { font-size:11px; color:#9ca3af; font-weight:400; }
+/* 折线图 SVG */
+.db-chart { width:100%; height:160px; }
+/* 柱状图 */
+.db-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:12px; }
+.db-bar-label { width:64px; color:#6b7280; flex-shrink:0; text-align:right; }
+.db-bar-track { flex:1; background:#f3f4f6; border-radius:3px; height:14px; position:relative; }
+.db-bar-fill { height:100%; border-radius:3px; transition:width .3s; }
+.db-bar-num { width:32px; text-align:right; color:#374151; font-weight:500; flex-shrink:0; }
+/* 表格 */
+.db-table { width:100%; border-collapse:collapse; font-size:12px; }
+.db-table th { text-align:left; padding:6px 10px; color:#9ca3af; font-weight:500; border-bottom:1px solid #f3f4f6; white-space:nowrap; }
+.db-table td { padding:8px 10px; border-bottom:1px solid #f9fafb; color:#374151; white-space:nowrap; }
+.db-table tr:last-child td { border-bottom:none; }
+.db-badge { display:inline-block; padding:2px 8px; border-radius:3px; font-size:11px; font-weight:500; }
+.db-badge.high { background:#fef2f2; color:#ef4444; }
+.db-badge.mid  { background:#fef3c7; color:#d97706; }
+.db-badge.low  { background:#f0fdf4; color:#16a34a; }
+/* 环形/饼图 */
+.db-donut-wrap { display:flex; align-items:center; gap:20px; }
+.db-donut-legend { display:flex; flex-direction:column; gap:7px; }
+.db-legend-item { display:flex; align-items:center; gap:7px; font-size:12px; color:#374151; }
+.db-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+</style>
+<div class="db">
+    <!-- 页头 -->
+    <div class="db-header">
+        <div>
+            <div class="db-title">📊 质控数据看板</div>
+            <div class="db-sub">实时展示科室病历质检整体情况 · 数据更新时间 2026-06-08 08:00</div>
+        </div>
+        <div class="db-filter">
+            <button class="db-filter-btn active" onclick="dbFilter(this)">本月</button>
+            <button class="db-filter-btn" onclick="dbFilter(this)">近3月</button>
+            <button class="db-filter-btn" onclick="dbFilter(this)">近6月</button>
+            <button class="db-filter-btn" onclick="dbFilter(this)">全年</button>
+        </div>
+    </div>
+
+    <!-- KPI 卡片 -->
+    <div class="db-kpi-row">
+        <div class="db-kpi">
+            <div class="db-kpi-label">本月质检总量</div>
+            <div class="db-kpi-val blue">1,284</div>
+            <div class="db-kpi-trend up">↑ 较上月 +12.3%</div>
+        </div>
+        <div class="db-kpi">
+            <div class="db-kpi-label">平均质检评分</div>
+            <div class="db-kpi-val green">87.4</div>
+            <div class="db-kpi-trend up">↑ 较上月 +1.8分</div>
+        </div>
+        <div class="db-kpi">
+            <div class="db-kpi-label">缺陷病历数</div>
+            <div class="db-kpi-val orange">236</div>
+            <div class="db-kpi-trend down">↓ 较上月 -8.1%</div>
+        </div>
+        <div class="db-kpi">
+            <div class="db-kpi-label">一票否决数</div>
+            <div class="db-kpi-val red">14</div>
+            <div class="db-kpi-trend down">↓ 较上月 -3</div>
+        </div>
+        <div class="db-kpi">
+            <div class="db-kpi-label">合格率</div>
+            <div class="db-kpi-val green">81.6%</div>
+            <div class="db-kpi-trend up">↑ 较上月 +2.4%</div>
+        </div>
+    </div>
+
+    <!-- 第二行：趋势折线 + 缺陷分布 -->
+    <div class="db-row2">
+        <!-- 月度趋势图 -->
+        <div class="db-card">
+            <div class="db-card-title">月度质检评分趋势 <span>近6个月</span></div>
+            <svg class="db-chart" viewBox="0 0 520 160" preserveAspectRatio="none">
+                <!-- 网格线 -->
+                <line x1="40" y1="20" x2="510" y2="20" stroke="#f3f4f6" stroke-width="1"/>
+                <line x1="40" y1="50" x2="510" y2="50" stroke="#f3f4f6" stroke-width="1"/>
+                <line x1="40" y1="80" x2="510" y2="80" stroke="#f3f4f6" stroke-width="1"/>
+                <line x1="40" y1="110" x2="510" y2="110" stroke="#f3f4f6" stroke-width="1"/>
+                <line x1="40" y1="140" x2="510" y2="140" stroke="#f3f4f6" stroke-width="1"/>
+                <!-- Y轴标签 -->
+                <text x="35" y="24" text-anchor="end" font-size="10" fill="#9ca3af">95</text>
+                <text x="35" y="54" text-anchor="end" font-size="10" fill="#9ca3af">90</text>
+                <text x="35" y="84" text-anchor="end" font-size="10" fill="#9ca3af">85</text>
+                <text x="35" y="114" text-anchor="end" font-size="10" fill="#9ca3af">80</text>
+                <text x="35" y="144" text-anchor="end" font-size="10" fill="#9ca3af">75</text>
+                <!-- X轴标签 -->
+                <text x="90" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">1月</text>
+                <text x="172" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">2月</text>
+                <text x="254" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">3月</text>
+                <text x="336" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">4月</text>
+                <text x="418" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">5月</text>
+                <text x="500" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">6月</text>
+                <!-- 填充区域 -->
+                <polygon points="90,100 172,90 254,110 336,75 418,65 500,60 500,140 90,140" fill="#eff6ff" opacity="0.6"/>
+                <!-- 折线 -->
+                <polyline points="90,100 172,90 254,110 336,75 418,65 500,60" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linejoin="round"/>
+                <!-- 数据点 -->
+                <circle cx="90" cy="100" r="4" fill="#2563eb"/>
+                <circle cx="172" cy="90" r="4" fill="#2563eb"/>
+                <circle cx="254" cy="110" r="4" fill="#2563eb"/>
+                <circle cx="336" cy="75" r="4" fill="#2563eb"/>
+                <circle cx="418" cy="65" r="4" fill="#2563eb"/>
+                <circle cx="500" cy="60" r="5" fill="#2563eb" stroke="#fff" stroke-width="2"/>
+                <!-- 数值标签 -->
+                <text x="90" y="95" text-anchor="middle" font-size="10" fill="#2563eb">82.3</text>
+                <text x="172" y="85" text-anchor="middle" font-size="10" fill="#2563eb">83.8</text>
+                <text x="254" y="105" text-anchor="middle" font-size="10" fill="#2563eb">82.1</text>
+                <text x="336" y="70" text-anchor="middle" font-size="10" fill="#2563eb">85.6</text>
+                <text x="418" y="60" text-anchor="middle" font-size="10" fill="#2563eb">86.7</text>
+                <text x="500" y="55" text-anchor="middle" font-size="10" fill="#2563eb">87.4</text>
+            </svg>
+        </div>
+
+        <!-- 缺陷类型分布 -->
+        <div class="db-card">
+            <div class="db-card-title">缺陷类型分布 <span>本月</span></div>
+            <div class="db-donut-wrap">
+                <svg width="110" height="110" viewBox="0 0 110 110">
+                    <!-- 环形图近似用多段弧 -->
+                    <circle cx="55" cy="55" r="40" fill="none" stroke="#e5e7eb" stroke-width="18"/>
+                    <!-- 时间逻辑 34% -->
+                    <circle cx="55" cy="55" r="40" fill="none" stroke="#2563eb" stroke-width="18"
+                        stroke-dasharray="85 166" stroke-dashoffset="0" transform="rotate(-90 55 55)"/>
+                    <!-- 签名缺失 22% -->
+                    <circle cx="55" cy="55" r="40" fill="none" stroke="#60a5fa" stroke-width="18"
+                        stroke-dasharray="55 196" stroke-dashoffset="-85" transform="rotate(-90 55 55)"/>
+                    <!-- 内容缺陷 18% -->
+                    <circle cx="55" cy="55" r="40" fill="none" stroke="#f59e0b" stroke-width="18"
+                        stroke-dasharray="45 206" stroke-dashoffset="-140" transform="rotate(-90 55 55)"/>
+                    <!-- 病案首页 14% -->
+                    <circle cx="55" cy="55" r="40" fill="none" stroke="#ef4444" stroke-width="18"
+                        stroke-dasharray="35 216" stroke-dashoffset="-185" transform="rotate(-90 55 55)"/>
+                    <!-- 其他 12% -->
+                    <circle cx="55" cy="55" r="40" fill="none" stroke="#d1d5db" stroke-width="18"
+                        stroke-dasharray="30 221" stroke-dashoffset="-220" transform="rotate(-90 55 55)"/>
+                    <text x="55" y="51" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">236</text>
+                    <text x="55" y="64" text-anchor="middle" font-size="10" fill="#9ca3af">缺陷总数</text>
+                </svg>
+                <div class="db-donut-legend">
+                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#2563eb"></div>时间逻辑错误 34%</div>
+                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#60a5fa"></div>签名缺失 22%</div>
+                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#f59e0b"></div>内容不完整 18%</div>
+                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#ef4444"></div>病案首页问题 14%</div>
+                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#d1d5db"></div>其他 12%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第三行：科室排名 + 明细列表 -->
+    <div class="db-row3">
+        <!-- 科室评分排名 -->
+        <div class="db-card">
+            <div class="db-card-title">科室质检评分排名 <span>本月 Top 8</span></div>
+            <div class="db-bar-row"><div class="db-bar-label">心内科</div><div class="db-bar-track"><div class="db-bar-fill" style="width:94%;background:#2563eb;"></div></div><div class="db-bar-num">94.2</div></div>
+            <div class="db-bar-row"><div class="db-bar-label">神经外科</div><div class="db-bar-track"><div class="db-bar-fill" style="width:91%;background:#2563eb;"></div></div><div class="db-bar-num">91.7</div></div>
+            <div class="db-bar-row"><div class="db-bar-label">骨科</div><div class="db-bar-track"><div class="db-bar-fill" style="width:89%;background:#3b82f6;"></div></div><div class="db-bar-num">89.3</div></div>
+            <div class="db-bar-row"><div class="db-bar-label">产科</div><div class="db-bar-track"><div class="db-bar-fill" style="width:88%;background:#3b82f6;"></div></div><div class="db-bar-num">88.6</div></div>
+            <div class="db-bar-row"><div class="db-bar-label">呼吸内科</div><div class="db-bar-track"><div class="db-bar-fill" style="width:87%;background:#60a5fa;"></div></div><div class="db-bar-num">87.4</div></div>
+            <div class="db-bar-row"><div class="db-bar-label">消化科</div><div class="db-bar-track"><div class="db-bar-fill" style="width:84%;background:#60a5fa;"></div></div><div class="db-bar-num">84.1</div></div>
+            <div class="db-bar-row"><div class="db-bar-label">急诊科</div><div class="db-bar-track"><div class="db-bar-fill" style="width:79%;background:#f59e0b;"></div></div><div class="db-bar-num">79.8</div></div>
+            <div class="db-bar-row"><div class="db-bar-label">重症监护</div><div class="db-bar-track"><div class="db-bar-fill" style="width:75%;background:#ef4444;"></div></div><div class="db-bar-num">75.2</div></div>
+        </div>
+
+        <!-- 问题病历明细 -->
+        <div class="db-card">
+            <div class="db-card-title">近期问题病历明细 <span>需关注</span></div>
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th>患者/住院号</th>
+                        <th>科室</th>
+                        <th>评分</th>
+                        <th>风险</th>
+                        <th>主要缺陷</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>李明 / H20248821</td>
+                        <td>重症监护</td>
+                        <td style="color:#ef4444;font-weight:600;">61.3</td>
+                        <td><span class="db-badge high">高风险</span></td>
+                        <td>时间逻辑、签名</td>
+                    </tr>
+                    <tr>
+                        <td>王芳 / H20248756</td>
+                        <td>急诊科</td>
+                        <td style="color:#ef4444;font-weight:600;">68.5</td>
+                        <td><span class="db-badge high">高风险</span></td>
+                        <td>病案首页缺失</td>
+                    </tr>
+                    <tr>
+                        <td>张磊 / H20248634</td>
+                        <td>消化科</td>
+                        <td style="color:#d97706;font-weight:600;">74.2</td>
+                        <td><span class="db-badge mid">中风险</span></td>
+                        <td>内容不完整</td>
+                    </tr>
+                    <tr>
+                        <td>刘洋 / H20248512</td>
+                        <td>急诊科</td>
+                        <td style="color:#d97706;font-weight:600;">76.8</td>
+                        <td><span class="db-badge mid">中风险</span></td>
+                        <td>签名缺失</td>
+                    </tr>
+                    <tr>
+                        <td>陈晨 / H20248398</td>
+                        <td>重症监护</td>
+                        <td style="color:#d97706;font-weight:600;">78.1</td>
+                        <td><span class="db-badge mid">中风险</span></td>
+                        <td>时间逻辑错误</td>
+                    </tr>
+                    <tr>
+                        <td>赵华 / H20248276</td>
+                        <td>消化科</td>
+                        <td style="color:#16a34a;font-weight:600;">83.4</td>
+                        <td><span class="db-badge low">低风险</span></td>
+                        <td>格式规范</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+
 <!-- ══════ 报告详情页（覆盖层） ══════ -->
 <div id="report-page" style="display:none; position:fixed; top:44px; left:152px; right:0; bottom:0; background:#f0f2f5; overflow-y:auto; z-index:200;">
 <style>
@@ -850,6 +1103,28 @@ body {
     function switchSrcTab(el) {
         document.querySelectorAll('.src-tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
+    }
+
+    function dbFilter(el) {
+        document.querySelectorAll('.db-filter-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function showPage(page) {
+        // 隐藏 dashboard，显示主区；或反之
+        const dashEl = document.getElementById('dashboard-page');
+        const mainEl = document.querySelector('.main');
+        if (page === 'dashboard') {
+            dashEl.style.display = 'block';
+            mainEl.style.display = 'none';
+        } else {
+            dashEl.style.display = 'none';
+            mainEl.style.display = 'flex';
+        }
+        // 更新 nav active 状态
+        document.querySelectorAll('.nav-item[onclick]').forEach(el => {
+            el.classList.toggle('active', el.getAttribute('onclick').includes("'" + page + "'"));
+        });
     }
 
     function showReport(show) {
