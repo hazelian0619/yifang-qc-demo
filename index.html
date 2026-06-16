@@ -309,7 +309,7 @@ body {
         <div class="nav-group">
             <div class="nav-label">病历管理</div>
             <div class="nav-item" onclick="showPage('main')"><span class="ico">☰</span>病历质检</div>
-            <div class="nav-item" onclick="showPage('dashboard')"><span class="ico">📊</span>智控面板</div>
+            <div class="nav-item" onclick="showPage('dashboard')"><span class="ico">📊</span>质控面板</div>
             <div class="nav-item"><span class="ico">🕐</span>质检历史</div>
         </div>
         <div class="nav-group">
@@ -369,12 +369,35 @@ body {
             <div class="col" style="flex:1.05;">
                 <div class="col-header">待检病历文本内容</div>
                 <div class="src-tabs">
-                    <div class="src-tab active" onclick="switchSrcTab(this)">粘贴文本</div>
-                    <div class="src-tab" onclick="switchSrcTab(this)">上传文件</div>
+                    <div class="src-tab active" onclick="switchSrcTab(this,'tab-paste')">粘贴文本</div>
+                    <div class="src-tab" onclick="switchSrcTab(this,'tab-upload')">上传文件</div>
                     <div class="src-tab" style="cursor:default;color:#d1d5db;">从 HIS 选择 <span class="coming">即将支持</span></div>
                 </div>
-                <textarea class="text-area" id="medical-text"
-                    placeholder="在此粘贴或输入待检病历内容..."></textarea>
+                <!-- 粘贴文本区 -->
+                <div id="tab-paste">
+                    <textarea class="text-area" id="medical-text"
+                        placeholder="在此粘贴或输入待检病历内容..."></textarea>
+                </div>
+                <!-- 上传文件区 -->
+                <div id="tab-upload" style="display:none;">
+                    <div id="upload-drop" onclick="document.getElementById('file-input').click()"
+                        style="border:2px dashed #d1d5db;border-radius:8px;padding:40px 20px;text-align:center;cursor:pointer;background:#fafafa;transition:all .15s;"
+                        ondragover="event.preventDefault();this.style.borderColor='#2563eb';this.style.background='#eff6ff';"
+                        ondragleave="this.style.borderColor='#d1d5db';this.style.background='#fafafa';"
+                        ondrop="handleFileDrop(event)">
+                        <div style="font-size:28px;margin-bottom:8px;">📄</div>
+                        <div style="font-size:14px;font-weight:500;color:#374151;">点击或拖拽上传病历文件</div>
+                        <div style="font-size:12px;color:#9ca3af;margin-top:4px;">支持 .txt 文件</div>
+                        <input type="file" id="file-input" accept=".txt" style="display:none;" onchange="handleFileSelect(event)">
+                    </div>
+                    <div id="upload-preview" style="display:none;margin-top:8px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f0fdf4;border-radius:6px;border:1px solid #bbf7d0;font-size:13px;">
+                            <span id="upload-filename" style="color:#16a34a;font-weight:500;"></span>
+                            <span onclick="clearUpload()" style="cursor:pointer;color:#9ca3af;font-size:16px;">×</span>
+                        </div>
+                        <textarea class="text-area" id="upload-text" style="margin-top:6px;" readonly></textarea>
+                    </div>
+                </div>
                 <div class="info-strip" id="info-strip" style="display:none;">
                     <div class="info-strip-header">
                         <span class="info-strip-title">已识别信息</span>
@@ -917,12 +940,21 @@ body {
                     <pre id="rp-full-text" style="white-space:pre-wrap;font-size:12px;line-height:1.8;color:#374151;font-family:inherit;">请先在质检工作台输入病历文本并完成质检，详情将在此显示。</pre>
                 </div>
                 <div class="rp-doc-panel" id="doc-2">
-                    <div class="location">质检问题定位</div>
-                    <div id="rp-defect-locations" style="font-size:13px;line-height:2;color:#374151;">质检完成后，问题定位将在此显示。</div>
+                    <div class="location">入院记录</div>
+                    <pre id="rp-doc-2-text" style="white-space:pre-wrap;font-size:12px;line-height:1.8;color:#374151;font-family:inherit;">质检完成后显示。</pre>
                 </div>
-                <div class="rp-doc-panel" id="doc-3"><p style="color:#9ca3af;font-size:13px;padding:12px 0;">暂无</p></div>
-                <div class="rp-doc-panel" id="doc-4"><p style="color:#9ca3af;font-size:13px;padding:12px 0;">暂无</p></div>
-                <div class="rp-doc-panel" id="doc-5"><p style="color:#9ca3af;font-size:13px;padding:12px 0;">暂无</p></div>
+                <div class="rp-doc-panel" id="doc-3">
+                    <div class="location">首次病程记录</div>
+                    <pre id="rp-doc-3-text" style="white-space:pre-wrap;font-size:12px;line-height:1.8;color:#374151;font-family:inherit;">质检完成后显示。</pre>
+                </div>
+                <div class="rp-doc-panel" id="doc-4">
+                    <div class="location">日常病程记录</div>
+                    <pre id="rp-doc-4-text" style="white-space:pre-wrap;font-size:12px;line-height:1.8;color:#374151;font-family:inherit;">质检完成后显示。</pre>
+                </div>
+                <div class="rp-doc-panel" id="doc-5">
+                    <div class="location">出院记录</div>
+                    <pre id="rp-doc-5-text" style="white-space:pre-wrap;font-size:12px;line-height:1.8;color:#374151;font-family:inherit;">质检完成后显示。</pre>
+                </div>
             </div>
         </div>
 
@@ -1068,9 +1100,54 @@ T:36.3℃ P:99次/分 R:20次/分 BP:144/85mmHg
 
     document.getElementById('medical-text').value = SAMPLE_TEXT;
 
-    function switchSrcTab(el) {
+    function switchSrcTab(el, panelId) {
         document.querySelectorAll('.src-tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
+        document.getElementById('tab-paste').style.display  = panelId === 'tab-paste'  ? 'block' : 'none';
+        document.getElementById('tab-upload').style.display = panelId === 'tab-upload' ? 'block' : 'none';
+    }
+
+    function handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        readFile(file);
+    }
+
+    function handleFileDrop(e) {
+        e.preventDefault();
+        document.getElementById('upload-drop').style.borderColor = '#d1d5db';
+        document.getElementById('upload-drop').style.background = '#fafafa';
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+        readFile(file);
+    }
+
+    function readFile(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            document.getElementById('upload-filename').textContent = '✓ ' + file.name;
+            document.getElementById('upload-text').value = text;
+            document.getElementById('upload-drop').style.display = 'none';
+            document.getElementById('upload-preview').style.display = 'block';
+        };
+        reader.readAsText(file, 'UTF-8');
+    }
+
+    function clearUpload() {
+        document.getElementById('upload-filename').textContent = '';
+        document.getElementById('upload-text').value = '';
+        document.getElementById('upload-drop').style.display = 'block';
+        document.getElementById('upload-preview').style.display = 'none';
+        document.getElementById('file-input').value = '';
+    }
+
+    function getActiveText() {
+        const uploadTab = document.getElementById('tab-upload');
+        if (uploadTab.style.display !== 'none') {
+            return document.getElementById('upload-text').value.trim();
+        }
+        return document.getElementById('medical-text').value.trim();
     }
 
     function dbFilter(el) {
@@ -1137,7 +1214,7 @@ T:36.3℃ P:99次/分 R:20次/分 BP:144/85mmHg
     let lastText   = '';
 
     async function startCheck() {
-        const text = document.getElementById('medical-text').value.trim();
+        const text = getActiveText();
         if (!text) { alert('请先输入病历文本'); return; }
         lastText = text;
 
@@ -1277,18 +1354,46 @@ T:36.3℃ P:99次/分 R:20次/分 BP:144/85mmHg
 
             // 填充报告详情页
             document.getElementById('rp-doc-type').textContent = '文档类型：' + (report['文档类型'] || '--');
-            document.getElementById('rp-full-text').textContent = text;
+
+            // 按关键词拆分病历文本到5个Tab
+            function extractSection(txt, keywords) {
+                for (const kw of keywords) {
+                    const idx = txt.indexOf(kw);
+                    if (idx !== -1) {
+                        // 找到下一个大段标题
+                        const after = txt.slice(idx);
+                        const nextSection = after.search(/\n(主诉|现病史|既往史|体格检查|辅助检查|初步诊断|入院诊断|出院诊断|出院医嘱|病程记录|首次病程|日常病程|出院记录|入院记录|病案首页)/);
+                        return nextSection > 100 ? after.slice(0, nextSection).trim() : after.slice(0, 800).trim();
+                    }
+                }
+                return null;
+            }
+
+            const sec1 = extractSection(text, ['病案首页','住院病案首页']) || text.slice(0, 600);
+            const sec2 = extractSection(text, ['入院记录','入院病历']) || text.slice(0, 1200);
+            const sec3 = extractSection(text, ['首次病程记录','首次病程']) || '本病历未包含首次病程记录内容。';
+            const sec4 = extractSection(text, ['病程记录','日常病程','查房记录']) || '本病历未包含日常病程记录内容。';
+            const sec5 = extractSection(text, ['出院记录','出院小结']) || '本病历未包含出院记录内容。';
+
+            document.getElementById('rp-full-text').textContent = sec1;
+            document.getElementById('rp-doc-2-text') && (document.getElementById('rp-doc-2-text').textContent = sec2);
+            document.getElementById('rp-doc-3-text') && (document.getElementById('rp-doc-3-text').textContent = sec3);
+            document.getElementById('rp-doc-4-text') && (document.getElementById('rp-doc-4-text').textContent = sec4);
+            document.getElementById('rp-doc-5-text') && (document.getElementById('rp-doc-5-text').textContent = sec5);
             document.getElementById('rp-score').textContent   = report['得分'] ?? '--';
             document.getElementById('rp-level').textContent   = report['等级'] ?? '--';
             document.getElementById('rp-veto').textContent    = veto['触发'] ? '触发' : '无';
             document.getElementById('rp-defect-count').textContent  = defects.length;
             document.getElementById('rp-serious-count').textContent = serious;
 
-            // 缺陷定位（tab2）
-            const locEl = document.getElementById('rp-defect-locations');
-            locEl.innerHTML = defects.length
-                ? defects.map(c => `<p><strong>[${c['规则编号']}] ${c['规则名称']}</strong>（-${c['扣分']}分）：${c['原因']}</p>`).join('')
-                : '<p style="color:#16a34a;">未发现缺陷</p>';
+            // 缺陷定位追加到入院记录Tab
+            if (defects.length) {
+                const locText = '\n\n━━ 质检问题定位 ━━\n' + defects.map(c =>
+                    `[${c['规则编号']}] ${c['规则名称']}（-${c['扣分']}分）：${c['原因']}`
+                ).join('\n');
+                const doc2 = document.getElementById('rp-doc-2-text');
+                if (doc2) doc2.textContent += locText;
+            }
 
             // 缺陷建议列表
             const defectsEl = document.getElementById('rp-defects-list');
