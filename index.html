@@ -369,10 +369,9 @@ body {
                         病历智能打分质检
                         <span class="banner-badge">16阶检查</span>
                     </div>
-                    <div class="banner-sub">多维度16阶智能打分，一票否决规则校验与合规深度审查系统</div>
                 </div>
             </div>
-            <button class="start-btn" onclick="startCheck()">▶ 开始打分质检</button>
+            <button class="start-btn" onclick="startCheck()">开始质检</button>
         </div>
 
         <!-- 双栏主体 -->
@@ -414,7 +413,6 @@ body {
                 <div class="info-strip" id="info-strip" style="display:none;">
                     <div class="info-strip-header">
                         <span class="info-strip-title">已识别信息</span>
-                        <span class="info-strip-hint">自动识别输入并提取病历关键字段</span>
                     </div>
                     <div class="info-cells" id="info-cells">
                         <div class="info-cell"><span class="lbl">患者姓名：</span><span class="val" id="ic-name">识别中…</span></div>
@@ -433,7 +431,7 @@ body {
                 <div class="waiting-state" id="waiting-state">
                     <div class="waiting-icon" style="font-size:13px;font-weight:700;color:#9ca3af;letter-spacing:-0.5px;">QC</div>
                     <div class="waiting-title">准备病历多维打分质检</div>
-                    <div class="waiting-sub">请在左侧输入病历文本，点击右上角"开始打分质检"开启全维度16阶段合规打分与逻辑交叉校验。</div>
+                    <div class="waiting-sub">在左侧输入病历文本后点击开始质检</div>
                 </div>
 
                 <!-- 质检运行态 -->
@@ -509,12 +507,9 @@ body {
                             </div>
 
                             <div class="issue-section">
-                                <div class="issue-section-title">主要问题类型</div>
-                                <div class="issue-tags">
-                                    <span class="issue-tag">病案首页缺失</span>
-                                    <span class="issue-tag">签名缺失</span>
-                                    <span class="issue-tag">文书超时</span>
-                                    <span class="issue-tag">文书超时</span>
+                                <div class="issue-section-title">主要问题</div>
+                                <div class="issue-tags" id="issue-tags-container">
+                                    <span style="font-size:12px;color:#9ca3af;">质检完成后显示</span>
                                 </div>
                             </div>
 
@@ -589,7 +584,6 @@ body {
     <div class="db-header">
         <div>
             <div class="db-title">质控数据看板</div>
-            <div class="db-sub">实时展示科室病历质检整体情况 · 数据更新时间 2026-06-08 08:00</div>
         </div>
         <div class="db-filter">
             <button class="db-filter-btn active" onclick="dbFilter(this)">本月</button>
@@ -1394,11 +1388,11 @@ FMT-003 医师签名规范完整，缺失扣1-2分
             document.querySelector('.score-box.white .score-num').textContent = defects.length;
             const pinkBox = document.querySelector('.score-box.pink .score-num');
             if (pinkBox) pinkBox.textContent = serious;
-            const tagContainer = document.querySelector('.issue-tags');
+            const tagContainer = document.getElementById('issue-tags-container');
             if (tagContainer) {
                 tagContainer.innerHTML = defects.length
-                    ? defects.map(c => `<span class="issue-tag">${c['规则名称']}</span>`).join('')
-                    : '<span class="issue-tag" style="background:#f0fdf4;color:#16a34a;">无缺陷</span>';
+                    ? defects.slice(0,6).map(c => `<span class="issue-tag">${c['规则名称']}</span>`).join('')
+                    : '<span class="issue-tag" style="background:#f0fdf4;color:#16a34a;border-color:#bbf7d0;">无缺陷</span>';
             }
             document.getElementById('result-section').style.display = 'block';
 
