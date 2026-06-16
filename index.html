@@ -116,8 +116,6 @@ body {
 .col-right { flex:1; }
 /* src-tabs 下方内容区撑满剩余高度 */
 .col > .src-tabs { flex-shrink:0; }
-.col > #tab-paste,
-.col > #tab-upload { flex:1; min-height:0; }
 .col > .info-strip { flex-shrink:0; }
 
 .col-header {
@@ -272,23 +270,32 @@ body {
 
 /* 识别信息格子 */
 .info-strip {
-    border-top:1px solid #f0f0f0; padding:16px 20px; background:#f8fafc; flex-shrink:0;
+    border-top:1px solid #f0f0f0; padding:14px 20px 16px; background:#f8fafc; flex-shrink:0;
 }
 .info-strip-header {
-    display:flex; align-items:center; gap:8px; margin-bottom:12px;
+    display:flex; align-items:center; gap:8px; margin-bottom:10px;
 }
 .info-strip-title { font-size:13px; font-weight:600; color:#374151; }
 .info-strip-hint { font-size:12px; color:#9ca3af; }
 .info-cells {
-    display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:6px;
 }
 .info-cell {
-    padding:8px 12px; background:#fff; border-radius:6px;
-    border:1px solid #e5e7eb; font-size:13px; color:#374151;
+    padding:7px 11px; background:#fff; border-radius:6px;
+    border:1px solid #e5e7eb; font-size:12px; color:#374151;
     display:flex; align-items:center; gap:4px;
 }
-.info-cell .lbl { color:#9ca3af; font-size:12px; white-space:nowrap; }
+.info-cell .lbl { color:#9ca3af; font-size:11px; white-space:nowrap; }
 .info-cell .val { color:#111827; font-weight:500; }
+
+/* 左侧col内容区 - 确保文本撑满，info-strip固定底部 */
+.col > .col-text-area {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
 </style>
 </head>
 <body>
@@ -302,44 +309,44 @@ body {
         </div>
         <div class="nav-group">
             <div class="nav-label">门诊</div>
-            <div class="nav-item"><span class="ico">👤</span>患者管理</div>
-            <div class="nav-item"><span class="ico">⚡</span>快速诊断</div>
+            <div class="nav-item">患者管理</div>
+            <div class="nav-item">快速诊断</div>
         </div>
         <div class="nav-group">
             <div class="nav-label">住院</div>
-            <div class="nav-item"><span class="ico">📋</span>入院诊断</div>
-            <div class="nav-item"><span class="ico">👤</span>患者管理</div>
-            <div class="nav-item"><span class="ico">📄</span>文书生成</div>
+            <div class="nav-item">入院诊断</div>
+            <div class="nav-item">患者管理</div>
+            <div class="nav-item">文书生成</div>
         </div>
         <div class="nav-group">
             <div class="nav-label">病历管理</div>
-            <div class="nav-item" onclick="showPage('main')"><span class="ico">☰</span>病历质检</div>
-            <div class="nav-item" onclick="showPage('dashboard')"><span class="ico">📊</span>质控面板</div>
-            <div class="nav-item"><span class="ico">🕐</span>质检历史</div>
+            <div class="nav-item" onclick="showPage('main')">病历质检</div>
+            <div class="nav-item" onclick="showPage('dashboard')">质控面板</div>
+            <div class="nav-item">质检历史</div>
         </div>
         <div class="nav-group">
             <div class="nav-label">知识库</div>
-            <div class="nav-item"><span class="ico">📖</span>药典</div>
-            <div class="nav-item"><span class="ico">📊</span>临床决策</div>
-            <div class="nav-item"><span class="ico">📋</span>临床指南</div>
+            <div class="nav-item">药典</div>
+            <div class="nav-item">临床决策</div>
+            <div class="nav-item">临床指南</div>
         </div>
         <div class="nav-group">
             <div class="nav-label">工具库</div>
-            <div class="nav-item"><span class="ico">💬</span>智能聊天</div>
-            <div class="nav-item"><span class="ico">🎙</span>语音转文字</div>
-            <div class="nav-item"><span class="ico">📊</span>病历分析</div>
-            <div class="nav-item"><span class="ico">📋</span>病历模板</div>
-            <div class="nav-item"><span class="ico">🏥</span>住院病案</div>
+            <div class="nav-item">智能聊天</div>
+            <div class="nav-item">语音转文字</div>
+            <div class="nav-item">病历分析</div>
+            <div class="nav-item">病历模板</div>
+            <div class="nav-item">住院病案</div>
         </div>
         <div class="nav-group">
             <div class="nav-label">系统</div>
-            <div class="nav-item"><span class="ico">⚙</span>助手设置</div>
+            <div class="nav-item">助手设置</div>
         </div>
     </div>
 
     <!-- 顶部栏 -->
     <div class="topbar">
-        <div class="topbar-tab">☰ 病历质检 <span class="x">✕</span></div>
+        <div class="topbar-tab">病历质检 <span class="x">✕</span></div>
         <div class="topbar-right">
             <span>↓ 下载 PC 版</span>
             <div class="topbar-user">
@@ -356,7 +363,7 @@ body {
         <!-- Banner -->
         <div class="banner">
             <div class="banner-left">
-                <div class="banner-icon">☰</div>
+                <div class="banner-icon" style="font-size:14px;font-weight:700;letter-spacing:-0.5px;">QC</div>
                 <div>
                     <div class="banner-title">
                         病历智能打分质检
@@ -378,29 +385,30 @@ body {
                     <div class="src-tab" onclick="switchSrcTab(this,'tab-upload')">上传文件</div>
                     <div class="src-tab" style="cursor:default;color:#d1d5db;">从 HIS 选择 <span class="coming">即将支持</span></div>
                 </div>
+                <!-- 内容区包裹层：tab内容撑满，info-strip固定底部 -->
                 <!-- 粘贴文本区 -->
                 <div id="tab-paste" style="flex:1;display:flex;flex-direction:column;min-height:0;">
                     <textarea class="text-area" id="medical-text"
                         placeholder="在此粘贴或输入待检病历内容..." style="flex:1;min-height:0;"></textarea>
                 </div>
                 <!-- 上传文件区 -->
-                <div id="tab-upload" style="display:none;flex:1;flex-direction:column;min-height:0;padding:12px 16px;overflow-y:auto;">
+                <div id="tab-upload" style="display:none;flex:1;flex-direction:column;min-height:0;overflow:hidden;">
                     <div id="upload-drop" onclick="document.getElementById('file-input').click()"
-                        style="border:2px dashed #d1d5db;border-radius:8px;padding:40px 20px;text-align:center;cursor:pointer;background:#fafafa;transition:all .15s;"
+                        style="border:2px dashed #d1d5db;border-radius:8px;padding:40px 20px;text-align:center;cursor:pointer;background:#fafafa;transition:all .15s;margin:12px 16px;"
                         ondragover="event.preventDefault();this.style.borderColor='#2563eb';this.style.background='#eff6ff';"
                         ondragleave="this.style.borderColor='#d1d5db';this.style.background='#fafafa';"
                         ondrop="handleFileDrop(event)">
-                        <div style="font-size:28px;margin-bottom:8px;">📄</div>
+                        <div style="font-size:20px;margin-bottom:8px;color:#9ca3af;">↑</div>
                         <div style="font-size:14px;font-weight:500;color:#374151;">点击或拖拽上传病历文件</div>
                         <div style="font-size:12px;color:#9ca3af;margin-top:4px;">支持 .txt 文件</div>
                         <input type="file" id="file-input" accept=".txt" style="display:none;" onchange="handleFileSelect(event)">
                     </div>
-                    <div id="upload-preview" style="display:none;flex:1;display:none;flex-direction:column;min-height:0;">
-                        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f0fdf4;border-radius:6px;border:1px solid #bbf7d0;font-size:13px;flex-shrink:0;">
+                    <div id="upload-preview" style="display:none;flex:1;flex-direction:column;min-height:0;overflow:hidden;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#f0fdf4;border-bottom:1px solid #bbf7d0;font-size:13px;flex-shrink:0;">
                             <span id="upload-filename" style="color:#16a34a;font-weight:500;"></span>
-                            <span onclick="clearUpload()" style="cursor:pointer;color:#9ca3af;font-size:16px;">×</span>
+                            <span onclick="clearUpload()" style="cursor:pointer;color:#9ca3af;font-size:16px;line-height:1;">×</span>
                         </div>
-                        <textarea class="text-area" id="upload-text" style="flex:1;min-height:0;margin-top:6px;" readonly></textarea>
+                        <textarea class="text-area" id="upload-text" style="flex:1;min-height:0;" readonly></textarea>
                     </div>
                 </div>
                 <div class="info-strip" id="info-strip" style="display:none;">
@@ -423,7 +431,7 @@ body {
             <div class="col col-right">
                 <!-- 等待态 -->
                 <div class="waiting-state" id="waiting-state">
-                    <div class="waiting-icon">☰</div>
+                    <div class="waiting-icon" style="font-size:13px;font-weight:700;color:#9ca3af;letter-spacing:-0.5px;">QC</div>
                     <div class="waiting-title">准备病历多维打分质检</div>
                     <div class="waiting-sub">请在左侧输入病历文本，点击右上角"开始打分质检"开启全维度16阶段合规打分与逻辑交叉校验。</div>
                 </div>
@@ -479,12 +487,12 @@ body {
                             <div class="result-card-title">结果摘要卡</div>
                             <div class="result-score-row">
                                 <div class="score-box blue">
-                                    <div class="score-num">60.9</div>
-                                    <div class="score-lbl">总分分数</div>
+                                    <div class="score-num">--</div>
+                                    <div class="score-lbl">总分</div>
                                 </div>
                                 <div class="score-box gray">
-                                    <div class="score-num">A/B/C</div>
-                                    <div class="score-lbl">fc等级</div>
+                                    <div class="score-num">--</div>
+                                    <div class="score-lbl">等级</div>
                                 </div>
                                 <div class="score-box white">
                                     <div class="score-num">0</div>
@@ -580,7 +588,7 @@ body {
     <!-- 页头 -->
     <div class="db-header">
         <div>
-            <div class="db-title">📊 质控数据看板</div>
+            <div class="db-title">质控数据看板</div>
             <div class="db-sub">实时展示科室病历质检整体情况 · 数据更新时间 2026-06-08 08:00</div>
         </div>
         <div class="db-filter">
@@ -1366,7 +1374,17 @@ FMT-003 医师签名规范完整，缺失扣1-2分
             items[last].classList.add('done');
             badges[last].className = 'flow-badge done'; badges[last].textContent = '已完成';
 
-            const defects = (report['检查结果'] || []).filter(c => c['结果'] === '不合规');
+            const defects = (report['检查结果'] || []).filter(c => {
+                // 兼容 AI 可能返回英文字段名
+                const result = c['结果'] || c['result'] || c['status'] || '';
+                return result === '不合规' || result === 'fail' || result === 'failed' || result === 'non-compliant';
+            }).map(c => ({
+                '规则编号': c['规则编号'] || c['rule_id'] || c['id'] || '--',
+                '规则名称': c['规则名称'] || c['rule_name'] || c['name'] || c['title'] || '--',
+                '结果':     c['结果'] || c['result'] || '不合规',
+                '原因':     c['原因'] || c['reason'] || c['description'] || c['detail'] || '--',
+                '扣分':     Number(c['扣分'] ?? c['score'] ?? c['deduction'] ?? 0),
+            }));
             const veto    = report['一票否决'] || {};
             const serious = defects.filter(c => (c['扣分'] || 0) >= 10).length;
 
