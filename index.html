@@ -380,12 +380,12 @@ body {
                         <span class="info-strip-title">已识别信息</span>
                         <span class="info-strip-hint">自动识别输入并提取病历关键字段</span>
                     </div>
-                    <div class="info-cells">
-                        <div class="info-cell"><span class="lbl">患者姓名：</span><span class="val">张三</span></div>
-                        <div class="info-cell"><span class="lbl">性别年龄：</span><span class="val">男 / 45岁</span></div>
-                        <div class="info-cell"><span class="lbl">住院号：</span><span class="val">H12345</span></div>
-                        <div class="info-cell"><span class="lbl">科室：</span><span class="val">呼吸内科</span></div>
-                        <div class="info-cell"><span class="lbl">文书类型：</span><span class="val">入院记录</span></div>
+                    <div class="info-cells" id="info-cells">
+                        <div class="info-cell"><span class="lbl">患者姓名：</span><span class="val" id="ic-name">识别中…</span></div>
+                        <div class="info-cell"><span class="lbl">性别年龄：</span><span class="val" id="ic-gender">识别中…</span></div>
+                        <div class="info-cell"><span class="lbl">住院号：</span><span class="val" id="ic-id">识别中…</span></div>
+                        <div class="info-cell"><span class="lbl">科室：</span><span class="val" id="ic-dept">识别中…</span></div>
+                        <div class="info-cell"><span class="lbl">文书类型：</span><span class="val" id="ic-type">识别中…</span></div>
                         <div class="info-cell"><span class="lbl">数据来源：</span><span class="val">粘贴文本</span></div>
                     </div>
                 </div>
@@ -566,29 +566,29 @@ body {
     <!-- KPI 卡片 -->
     <div class="db-kpi-row">
         <div class="db-kpi">
-            <div class="db-kpi-label">本月质检总量</div>
-            <div class="db-kpi-val blue">1,284</div>
-            <div class="db-kpi-trend up">↑ 较上月 +12.3%</div>
+            <div class="db-kpi-label">本批质检总量</div>
+            <div class="db-kpi-val blue">14</div>
+            <div class="db-kpi-trend up">↑ 黔东南州人民医院</div>
         </div>
         <div class="db-kpi">
             <div class="db-kpi-label">平均质检评分</div>
-            <div class="db-kpi-val green">87.4</div>
-            <div class="db-kpi-trend up">↑ 较上月 +1.8分</div>
+            <div class="db-kpi-val green">93.6</div>
+            <div class="db-kpi-trend up">↑ 高于基准线 +3.6分</div>
         </div>
         <div class="db-kpi">
             <div class="db-kpi-label">缺陷病历数</div>
-            <div class="db-kpi-val orange">236</div>
-            <div class="db-kpi-trend down">↓ 较上月 -8.1%</div>
+            <div class="db-kpi-val orange">4</div>
+            <div class="db-kpi-trend down">其中不合格 1 份</div>
         </div>
         <div class="db-kpi">
             <div class="db-kpi-label">一票否决数</div>
-            <div class="db-kpi-val red">14</div>
-            <div class="db-kpi-trend down">↓ 较上月 -3</div>
+            <div class="db-kpi-val red">1</div>
+            <div class="db-kpi-trend down">王文兰病历触发</div>
         </div>
         <div class="db-kpi">
             <div class="db-kpi-label">合格率</div>
-            <div class="db-kpi-val green">81.6%</div>
-            <div class="db-kpi-trend up">↑ 较上月 +2.4%</div>
+            <div class="db-kpi-val green">92.9%</div>
+            <div class="db-kpi-trend up">甲级 12 份 / 丙级 1 份</div>
         </div>
     </div>
 
@@ -604,37 +604,35 @@ body {
                 <line x1="40" y1="80" x2="510" y2="80" stroke="#f3f4f6" stroke-width="1"/>
                 <line x1="40" y1="110" x2="510" y2="110" stroke="#f3f4f6" stroke-width="1"/>
                 <line x1="40" y1="140" x2="510" y2="140" stroke="#f3f4f6" stroke-width="1"/>
-                <!-- Y轴标签 -->
-                <text x="35" y="24" text-anchor="end" font-size="10" fill="#9ca3af">95</text>
-                <text x="35" y="54" text-anchor="end" font-size="10" fill="#9ca3af">90</text>
-                <text x="35" y="84" text-anchor="end" font-size="10" fill="#9ca3af">85</text>
+                <!-- Y轴标签 100~60 -->
+                <text x="35" y="24" text-anchor="end" font-size="10" fill="#9ca3af">100</text>
+                <text x="35" y="54" text-anchor="end" font-size="10" fill="#9ca3af">95</text>
+                <text x="35" y="84" text-anchor="end" font-size="10" fill="#9ca3af">90</text>
                 <text x="35" y="114" text-anchor="end" font-size="10" fill="#9ca3af">80</text>
-                <text x="35" y="144" text-anchor="end" font-size="10" fill="#9ca3af">75</text>
-                <!-- X轴标签 -->
-                <text x="90" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">1月</text>
-                <text x="172" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">2月</text>
-                <text x="254" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">3月</text>
-                <text x="336" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">4月</text>
-                <text x="418" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">5月</text>
-                <text x="500" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">6月</text>
-                <!-- 填充区域 -->
-                <polygon points="90,100 172,90 254,110 336,75 418,65 500,60 500,140 90,140" fill="#eff6ff" opacity="0.6"/>
-                <!-- 折线 -->
-                <polyline points="90,100 172,90 254,110 336,75 418,65 500,60" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linejoin="round"/>
-                <!-- 数据点 -->
-                <circle cx="90" cy="100" r="4" fill="#2563eb"/>
-                <circle cx="172" cy="90" r="4" fill="#2563eb"/>
-                <circle cx="254" cy="110" r="4" fill="#2563eb"/>
-                <circle cx="336" cy="75" r="4" fill="#2563eb"/>
-                <circle cx="418" cy="65" r="4" fill="#2563eb"/>
-                <circle cx="500" cy="60" r="5" fill="#2563eb" stroke="#fff" stroke-width="2"/>
-                <!-- 数值标签 -->
-                <text x="90" y="95" text-anchor="middle" font-size="10" fill="#2563eb">82.3</text>
-                <text x="172" y="85" text-anchor="middle" font-size="10" fill="#2563eb">83.8</text>
-                <text x="254" y="105" text-anchor="middle" font-size="10" fill="#2563eb">82.1</text>
-                <text x="336" y="70" text-anchor="middle" font-size="10" fill="#2563eb">85.6</text>
-                <text x="418" y="60" text-anchor="middle" font-size="10" fill="#2563eb">86.7</text>
-                <text x="500" y="55" text-anchor="middle" font-size="10" fill="#2563eb">87.4</text>
+                <text x="35" y="144" text-anchor="end" font-size="10" fill="#9ca3af">60</text>
+                <!-- X轴：各科室/批次 -->
+                <text x="90"  y="158" text-anchor="middle" font-size="10" fill="#9ca3af">吴光芬</text>
+                <text x="172" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">周启福</text>
+                <text x="254" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">李治花</text>
+                <text x="336" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">王文兰</text>
+                <text x="418" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">姜老奶</text>
+                <text x="500" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">张花万</text>
+                <!-- 分数映射：100→20, 90→56, 70→112, 50→140（Y轴范围60-100）-->
+                <!-- 100分→y=20, 90分→y=57, 70分→y=120, 50分→y=140 -->
+                <polygon points="90,20 172,120 254,57 336,140 418,20 500,20 500,140 90,140" fill="#eff6ff" opacity="0.6"/>
+                <polyline points="90,20 172,120 254,57 336,140 418,20 500,20" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linejoin="round"/>
+                <circle cx="90"  cy="20"  r="4" fill="#2563eb"/>
+                <circle cx="172" cy="120" r="4" fill="#ef4444"/>
+                <circle cx="254" cy="57"  r="4" fill="#2563eb"/>
+                <circle cx="336" cy="140" r="5" fill="#ef4444" stroke="#fff" stroke-width="2"/>
+                <circle cx="418" cy="20"  r="4" fill="#2563eb"/>
+                <circle cx="500" cy="20"  r="4" fill="#2563eb"/>
+                <text x="90"  y="15"  text-anchor="middle" font-size="10" fill="#2563eb">100</text>
+                <text x="172" y="115" text-anchor="middle" font-size="10" fill="#ef4444">70</text>
+                <text x="254" y="52"  text-anchor="middle" font-size="10" fill="#2563eb">90</text>
+                <text x="336" y="135" text-anchor="middle" font-size="10" fill="#ef4444">50</text>
+                <text x="418" y="15"  text-anchor="middle" font-size="10" fill="#2563eb">100</text>
+                <text x="500" y="15"  text-anchor="middle" font-size="10" fill="#2563eb">100</text>
             </svg>
         </div>
 
@@ -664,11 +662,11 @@ body {
                     <text x="55" y="64" text-anchor="middle" font-size="10" fill="#9ca3af">缺陷总数</text>
                 </svg>
                 <div class="db-donut-legend">
-                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#2563eb"></div>时间逻辑错误 34%</div>
-                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#60a5fa"></div>签名缺失 22%</div>
-                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#f59e0b"></div>内容不完整 18%</div>
-                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#ef4444"></div>病案首页问题 14%</div>
-                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#d1d5db"></div>其他 12%</div>
+                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#2563eb"></div>主诉完整 29%</div>
+                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#60a5fa"></div>现病史一致性 14%</div>
+                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#f59e0b"></div>辅助检查记录 14%</div>
+                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#ef4444"></div>基本信息一致性 14%</div>
+                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#d1d5db"></div>其他 29%</div>
                 </div>
             </div>
         </div>
@@ -678,15 +676,15 @@ body {
     <div class="db-row3">
         <!-- 科室评分排名 -->
         <div class="db-card">
-            <div class="db-card-title">科室质检评分排名 <span>本月 Top 8</span></div>
-            <div class="db-bar-row"><div class="db-bar-label">心内科</div><div class="db-bar-track"><div class="db-bar-fill" style="width:94%;background:#2563eb;"></div></div><div class="db-bar-num">94.2</div></div>
-            <div class="db-bar-row"><div class="db-bar-label">神经外科</div><div class="db-bar-track"><div class="db-bar-fill" style="width:91%;background:#2563eb;"></div></div><div class="db-bar-num">91.7</div></div>
-            <div class="db-bar-row"><div class="db-bar-label">骨科</div><div class="db-bar-track"><div class="db-bar-fill" style="width:89%;background:#3b82f6;"></div></div><div class="db-bar-num">89.3</div></div>
-            <div class="db-bar-row"><div class="db-bar-label">产科</div><div class="db-bar-track"><div class="db-bar-fill" style="width:88%;background:#3b82f6;"></div></div><div class="db-bar-num">88.6</div></div>
-            <div class="db-bar-row"><div class="db-bar-label">呼吸内科</div><div class="db-bar-track"><div class="db-bar-fill" style="width:87%;background:#60a5fa;"></div></div><div class="db-bar-num">87.4</div></div>
-            <div class="db-bar-row"><div class="db-bar-label">消化科</div><div class="db-bar-track"><div class="db-bar-fill" style="width:84%;background:#60a5fa;"></div></div><div class="db-bar-num">84.1</div></div>
-            <div class="db-bar-row"><div class="db-bar-label">急诊科</div><div class="db-bar-track"><div class="db-bar-fill" style="width:79%;background:#f59e0b;"></div></div><div class="db-bar-num">79.8</div></div>
-            <div class="db-bar-row"><div class="db-bar-label">重症监护</div><div class="db-bar-track"><div class="db-bar-fill" style="width:75%;background:#ef4444;"></div></div><div class="db-bar-num">75.2</div></div>
+            <div class="db-card-title">病历质检评分分布 <span>本批 14 份</span></div>
+            <div class="db-bar-row"><div class="db-bar-label">吴光芬</div><div class="db-bar-track"><div class="db-bar-fill" style="width:100%;background:#2563eb;"></div></div><div class="db-bar-num">100</div></div>
+            <div class="db-bar-row"><div class="db-bar-label">姜老奶</div><div class="db-bar-track"><div class="db-bar-fill" style="width:100%;background:#2563eb;"></div></div><div class="db-bar-num">100</div></div>
+            <div class="db-bar-row"><div class="db-bar-label">张花万</div><div class="db-bar-track"><div class="db-bar-fill" style="width:100%;background:#2563eb;"></div></div><div class="db-bar-num">100</div></div>
+            <div class="db-bar-row"><div class="db-bar-label">杨贵强</div><div class="db-bar-track"><div class="db-bar-fill" style="width:100%;background:#2563eb;"></div></div><div class="db-bar-num">100</div></div>
+            <div class="db-bar-row"><div class="db-bar-label">潘世伟</div><div class="db-bar-track"><div class="db-bar-fill" style="width:100%;background:#2563eb;"></div></div><div class="db-bar-num">100</div></div>
+            <div class="db-bar-row"><div class="db-bar-label">李治花</div><div class="db-bar-track"><div class="db-bar-fill" style="width:90%;background:#3b82f6;"></div></div><div class="db-bar-num">90</div></div>
+            <div class="db-bar-row"><div class="db-bar-label">周启福</div><div class="db-bar-track"><div class="db-bar-fill" style="width:70%;background:#f59e0b;"></div></div><div class="db-bar-num">70</div></div>
+            <div class="db-bar-row"><div class="db-bar-label">王文兰</div><div class="db-bar-track"><div class="db-bar-fill" style="width:50%;background:#ef4444;"></div></div><div class="db-bar-num">50</div></div>
         </div>
 
         <!-- 问题病历明细 -->
@@ -704,46 +702,46 @@ body {
                 </thead>
                 <tbody>
                     <tr>
-                        <td>李明 / H20248821</td>
-                        <td>重症监护</td>
-                        <td style="color:#ef4444;font-weight:600;">61.3</td>
-                        <td><span class="db-badge high">高风险</span></td>
-                        <td>时间逻辑、签名</td>
+                        <td>王文兰</td>
+                        <td>黔东南州人民医院</td>
+                        <td style="color:#ef4444;font-weight:600;">50</td>
+                        <td><span class="db-badge high">不合格</span></td>
+                        <td>主诉完整、基本信息一致性、性别一致性</td>
                     </tr>
                     <tr>
-                        <td>王芳 / H20248756</td>
-                        <td>急诊科</td>
-                        <td style="color:#ef4444;font-weight:600;">68.5</td>
-                        <td><span class="db-badge high">高风险</span></td>
-                        <td>病案首页缺失</td>
+                        <td>周启福</td>
+                        <td>黔东南州人民医院</td>
+                        <td style="color:#ef4444;font-weight:600;">70</td>
+                        <td><span class="db-badge high">丙级</span></td>
+                        <td>主诉完整、现病史与主诉一致、辅助检查记录规范</td>
                     </tr>
                     <tr>
-                        <td>张磊 / H20248634</td>
-                        <td>消化科</td>
-                        <td style="color:#d97706;font-weight:600;">74.2</td>
-                        <td><span class="db-badge mid">中风险</span></td>
-                        <td>内容不完整</td>
+                        <td>李治花</td>
+                        <td>黔东南州人民医院</td>
+                        <td style="color:#16a34a;font-weight:600;">90</td>
+                        <td><span class="db-badge low">甲级</span></td>
+                        <td>诊断依据不足</td>
                     </tr>
                     <tr>
-                        <td>刘洋 / H20248512</td>
-                        <td>急诊科</td>
-                        <td style="color:#d97706;font-weight:600;">76.8</td>
-                        <td><span class="db-badge mid">中风险</span></td>
-                        <td>签名缺失</td>
+                        <td>吴光芬</td>
+                        <td>黔东南州人民医院</td>
+                        <td style="color:#16a34a;font-weight:600;">100</td>
+                        <td><span class="db-badge low">甲级</span></td>
+                        <td>无缺陷</td>
                     </tr>
                     <tr>
-                        <td>陈晨 / H20248398</td>
-                        <td>重症监护</td>
-                        <td style="color:#d97706;font-weight:600;">78.1</td>
-                        <td><span class="db-badge mid">中风险</span></td>
-                        <td>时间逻辑错误</td>
+                        <td>姜老奶</td>
+                        <td>黔东南州人民医院</td>
+                        <td style="color:#16a34a;font-weight:600;">100</td>
+                        <td><span class="db-badge low">甲级</span></td>
+                        <td>无缺陷</td>
                     </tr>
                     <tr>
-                        <td>赵华 / H20248276</td>
-                        <td>消化科</td>
-                        <td style="color:#16a34a;font-weight:600;">83.4</td>
-                        <td><span class="db-badge low">低风险</span></td>
-                        <td>格式规范</td>
+                        <td>张花万</td>
+                        <td>黔东南州人民医院</td>
+                        <td style="color:#16a34a;font-weight:600;">100</td>
+                        <td><span class="db-badge low">甲级</span></td>
+                        <td>无缺陷</td>
                     </tr>
                 </tbody>
             </table>
@@ -915,45 +913,16 @@ body {
             </div>
             <div class="rp-doc-content">
                 <div class="rp-doc-panel active" id="doc-1">
-                    <div class="location">当前定位：病案首页-基本信息</div>
-                    <p><strong>患者名称</strong>：王小明</p>
-                    <p><strong>入院号</strong>：123456</p>
-                    <p><strong>部门</strong>：呼吸医学</p>
-                    <h4>基本情况</h4>
-                    <p>患者王小明，男，52岁，因反复咳嗽咳痰5年，加重伴喘息1周入院。既往有慢性阻塞性肺病病史，长期吸烟史30年。</p>
-                    <p>入院时生命体征：体温36.8℃，脉搏92次/分，呼吸20次/分，血压135/85mmHg，血氧饱和度91%。</p>
+                    <div class="location" id="rp-doc-type">待质检</div>
+                    <pre id="rp-full-text" style="white-space:pre-wrap;font-size:12px;line-height:1.8;color:#374151;font-family:inherit;">请先在质检工作台输入病历文本并完成质检，详情将在此显示。</pre>
                 </div>
                 <div class="rp-doc-panel" id="doc-2">
-                    <div class="location">当前定位：入院记录-主诉与现病史</div>
-                    <h4>主诉</h4>
-                    <p>反复咳嗽咳痰5年，加重伴喘息1周。</p>
-                    <h4>现病史</h4>
-                    <p>患者5年前开始出现咳嗽咳痰，多为白色黏痰，秋冬季节加重，曾多次就诊于当地医院，诊断为慢性支气管炎，予抗感染及对症治疗后好转。</p>
-                    <p>1周前受凉后咳嗽加重，痰量增多，颜色变黄，伴有喘息、胸闷，活动后气短明显，夜间不能平卧。</p>
-                    <p>入院记录时间逻辑错误，推进：-5分，原脱编则11:00。</p>
+                    <div class="location">质检问题定位</div>
+                    <div id="rp-defect-locations" style="font-size:13px;line-height:2;color:#374151;">质检完成后，问题定位将在此显示。</div>
                 </div>
-                <div class="rp-doc-panel" id="doc-3">
-                    <div class="location">当前定位：首次病程-病情评估</div>
-                    <h4>首次病程记录</h4>
-                    <p>患者入院后完善相关检查，胸部CT示双肺气肿改变，右下肺感染。肺功能检查提示中度阻塞性通气功能障碍。</p>
-                    <p>血常规：白细胞12.3×10⁹/L，中性粒细胞85%，C反应蛋白68mg/L。</p>
-                    <p>初步诊断：慢性阻塞性肺病急性加重，肺部感染。</p>
-                </div>
-                <div class="rp-doc-panel" id="doc-4">
-                    <div class="location">当前定位：日常病程记录</div>
-                    <h4>2026-06-07 病程记录</h4>
-                    <p>患者经抗感染、解痉平喘、化痰治疗后，咳嗽咳痰有所减轻，喘息略有缓解，仍有活动后气短。</p>
-                    <p>体格检查：双肺呼吸音粗，可闻及散在湿性啰音及哮鸣音。继续当前治疗方案。</p>
-                    <h4>2026-06-08 病程记录</h4>
-                    <p>患者病情较前好转，咳嗽减少，痰液转为白色，喘息明显改善，血氧饱和度升至96%。</p>
-                </div>
-                <div class="rp-doc-panel" id="doc-5">
-                    <div class="location">当前定位：出院记录</div>
-                    <h4>出院小结</h4>
-                    <p>患者经10天住院治疗，病情明显好转，咳嗽咳痰减轻，喘息缓解，血氧饱和度维持在96%以上，达到出院标准。</p>
-                    <h4>出院医嘱</h4>
-                    <p>1. 继续口服抗生素5天；2. 沙美特罗/丙酸氟替卡松吸入剂长期维持；3. 戒烟；4. 门诊随访。</p>
-                </div>
+                <div class="rp-doc-panel" id="doc-3"><p style="color:#9ca3af;font-size:13px;padding:12px 0;">暂无</p></div>
+                <div class="rp-doc-panel" id="doc-4"><p style="color:#9ca3af;font-size:13px;padding:12px 0;">暂无</p></div>
+                <div class="rp-doc-panel" id="doc-5"><p style="color:#9ca3af;font-size:13px;padding:12px 0;">暂无</p></div>
             </div>
         </div>
 
@@ -963,27 +932,23 @@ body {
             <div class="rp-summary-card">
                 <div class="rp-score-strip">
                     <div class="rp-score-col">
-                        <div class="num green">85</div>
-                        <div class="lbl">成分</div>
+                        <div class="num green" id="rp-score">--</div>
+                        <div class="lbl">得分</div>
                     </div>
                     <div class="rp-score-col">
-                        <div class="num">A</div>
+                        <div class="num" id="rp-level">--</div>
                         <div class="lbl">等级</div>
                     </div>
                     <div class="rp-score-col">
-                        <div class="num orange">中危</div>
-                        <div class="lbl">风险结论</div>
+                        <div class="num orange" id="rp-veto">无</div>
+                        <div class="lbl">一票否决</div>
                     </div>
                     <div class="rp-score-col">
-                        <div class="num">无</div>
-                        <div class="lbl">一票否决提示</div>
-                    </div>
-                    <div class="rp-score-col">
-                        <div class="num">15</div>
+                        <div class="num" id="rp-defect-count">--</div>
                         <div class="lbl">总缺陷</div>
                     </div>
                     <div class="rp-score-col">
-                        <div class="num red">2</div>
+                        <div class="num red" id="rp-serious-count">--</div>
                         <div class="lbl">严重缺陷</div>
                     </div>
                 </div>
@@ -998,48 +963,7 @@ body {
                 <div class="rp-tab-panels">
                     <!-- 缺陷建议 -->
                     <div class="rp-tab-panel active" id="rp-defects">
-                        <div class="rp-defect-item">
-                            <div class="rp-defect-row1">
-                                <div class="rp-defect-name">缺陷名称：入院记录时间逻辑错误</div>
-                                <div class="rp-defect-score">扣扣：-5分</div>
-                            </div>
-                            <div class="rp-defect-tags">
-                                <span class="rp-dtag type">缺陷类型：导抗病</span>
-                                <span class="rp-dtag risk">严重性：中风险</span>
-                            </div>
-                            <div class="rp-defect-info">
-                                <span><span class="k">问题位置：</span>正院记录时间：10分，原脱编则：10:00</span>
-                                <span><span class="k">问题描述：</span>入院记录时间逻辑错误，无流转错误，医生产生症时赢的错误</span>
-                                <span><span class="k">规则基础：</span>根据国家卫生健康委关于印发《病历书写基本规范》</span>
-                            </div>
-                            <div class="rp-defect-desc">修改建议：请将改症该词，改发病能更精稿度的建议。</div>
-                            <div class="rp-defect-actions">
-                                <button class="rp-da-btn">确认</button>
-                                <button class="rp-da-btn">忽略</button>
-                                <button class="rp-da-btn primary">加入报告</button>
-                            </div>
-                        </div>
-                        <div class="rp-defect-item">
-                            <div class="rp-defect-row1">
-                                <div class="rp-defect-name">缺陷名称：入院记录时间逻辑错误</div>
-                                <div class="rp-defect-score">扣扣：-5分</div>
-                            </div>
-                            <div class="rp-defect-tags">
-                                <span class="rp-dtag type">缺陷类型：导椿病</span>
-                                <span class="rp-dtag risk">严重性：中风险</span>
-                            </div>
-                            <div class="rp-defect-info">
-                                <span><span class="k">问题位置：</span>推进：-5分，原脱编则11:00</span>
-                                <span><span class="k">问题描述：</span>入院记录时间逻辑错误，原圆稳定问题错误</span>
-                                <span><span class="k">规则基础：</span>根据国家卫生健康委关于印发《病历书写基本规范》</span>
-                            </div>
-                            <div class="rp-defect-desc">修改建议：请该改该进入建议</div>
-                            <div class="rp-defect-actions">
-                                <button class="rp-da-btn">确认</button>
-                                <button class="rp-da-btn">忽略</button>
-                                <button class="rp-da-btn primary">加入报告</button>
-                            </div>
-                        </div>
+                        <div id="rp-defects-list" style="color:#9ca3af;font-size:13px;padding:12px 0;">质检完成后缺陷列表将在此显示。</div>
                     </div>
 
                     <!-- 质检步骤 -->
@@ -1075,13 +999,14 @@ body {
 
                     <!-- 患者画像 -->
                     <div class="rp-tab-panel" id="rp-patient">
-                        <table class="rp-patient-table">
-                            <tr><td class="k">基本姓名</td><td class="v">王小明</td></tr>
-                            <tr><td class="k">文书存在情况</td><td class="v">5份文书</td></tr>
-                            <tr><td class="k">诊断内容描述</td><td class="v">呼吸医学、肺阻围</td></tr>
-                            <tr><td class="k">诊疗经过摘要</td><td class="v">第2页</td></tr>
-                            <tr><td class="k">关键字段</td><td class="v">--</td></tr>
-                            <tr><td class="k">缺陷内容</td><td class="v">入院记录时间逻辑错误</td></tr>
+                        <table class="rp-patient-table" id="rp-patient-table">
+                            <tr><td class="k">患者姓名</td><td class="v" id="pt-name">--</td></tr>
+                            <tr><td class="k">性别年龄</td><td class="v" id="pt-gender">--</td></tr>
+                            <tr><td class="k">住院号</td><td class="v" id="pt-hid">--</td></tr>
+                            <tr><td class="k">科室</td><td class="v" id="pt-dept">--</td></tr>
+                            <tr><td class="k">文档类型</td><td class="v" id="pt-doctype">--</td></tr>
+                            <tr><td class="k">质检等级</td><td class="v" id="pt-level">--</td></tr>
+                            <tr><td class="k">缺陷数</td><td class="v" id="pt-defects">--</td></tr>
                         </table>
                         <button style="width:100%;margin-top:12px;padding:9px 0;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;">导出报告</button>
                     </div>
@@ -1099,6 +1024,49 @@ body {
             el.classList.add('active');
         });
     });
+
+    // 预填示例病历
+    const SAMPLE_TEXT = `黔东南州人民医院
+入院记录
+
+姓名:吴光芬 性别:女 年龄:52岁 科室:内分泌科 床号:+33 住院号:0002051308
+
+姓名:吴光芬 性别:女
+年龄:52岁 民族:苗族
+出生地:贵州省黔东南苗族侗族自治州凯里市
+婚姻:已婚 职业:农民
+现住址:贵州省黔东南苗族侗族自治州凯里市旁海镇水珠村三组
+联系电话:13158108305
+病史陈述者:患者本人
+入院时间:2026-01-31 20:19
+记录时间:2026-01-31 21:11
+
+主诉:烦渴、多饮、多尿10+年
+
+现病史:10+年前患者无明显诱因烦渴、多饮、多尿,饮水量及尿量较前明显增多,就诊于我院门诊完善血糖:17.71mmol/L,无多食、易饥,无体重减轻,无视物模糊,无四肢麻木,无间歇性跛行等不适,随后我院完善检查确诊"2型糖尿病",并予"门冬胰岛素注射液 早13u中23u 晚20u"控制血糖,院外血糖控制不详,后自行停用胰岛素,外院调整为"盐酸二甲双胍片、格列美脲片"降血糖,血糖控制不详,未定期规律复诊;1天前患者于当地卫生院查随机末梢血糖23.0mmol/L,建议上级医院进一步诊治,伴有咳嗽、咳痰,为阵发性串咳,伴咳少量白色粘痰,不易咳出,伴乏力不适;今患者为进一步治疗就诊于我院门诊,门诊以"2型糖尿病"收入我科住院治疗。病来精神、睡眠可,饮食一般,大便正常,体重无明显改变。
+
+既往史:既往"高血压"病史10+年,最高血压160/mmHg,长期规律口服药物(具体不详)降血压治疗;否认肺、肾等重要脏器疾病史及传染病史;过敏史:无;手术史:否认。
+
+个人史:嗜烟:无,嗜酒:无。
+
+婚育史:已结婚,配偶:健康,现育有:2男。
+
+家族史:父亲:健在,母亲:健在,家族中无类似疾病及遗传病史。
+
+体格检查
+T:36.3℃ P:99次/分 R:20次/分 BP:144/85mmHg
+身高:150cm 体重:46Kg BMI:20.44kg/m²
+
+一般情况:发育:良好,营养:良好,神志:清醒,体位:自主,面容:慢性面容,查体合作。
+
+初步诊断：
+1. 2型糖尿病
+2. 高血压病3级（很高危）
+3. 急性上呼吸道感染
+
+医师签名：袁新菊 李涛`;
+
+    document.getElementById('medical-text').value = SAMPLE_TEXT;
 
     function switchSrcTab(el) {
         document.querySelectorAll('.src-tab').forEach(t => t.classList.remove('active'));
@@ -1251,8 +1219,31 @@ body {
         tryShowResult();
     }
 
+    function parsePatientInfo(text) {
+        const info = { name: '--', gender: '--', hid: '--', dept: '--' };
+        const nameM = text.match(/姓名[：:]\s*([^\s性别年龄科室床号住院\n，,]{2,6})/);
+        if (nameM) info.name = nameM[1].trim();
+        const genderM = text.match(/性别[：:]\s*(男|女)/);
+        const ageM = text.match(/年龄[：:]\s*(\d+)\s*岁/);
+        if (genderM || ageM) info.gender = (genderM?.[1] || '') + (ageM ? ' / ' + ageM[1] + '岁' : '');
+        const hidM = text.match(/住院号[：:]\s*([A-Za-z0-9]+)/);
+        if (hidM) info.hid = hidM[1];
+        const deptM = text.match(/科[室别][：:]\s*([^\s\n，,]{2,8})/);
+        if (deptM) info.dept = deptM[1];
+        return info;
+    }
+
     function renderResult(report) {
         lastReport = report;
+        const text = lastText;
+
+        // 解析患者信息并填入识别条
+        const info = parsePatientInfo(text);
+        document.getElementById('ic-name').textContent   = info.name;
+        document.getElementById('ic-gender').textContent = info.gender;
+        document.getElementById('ic-id').textContent     = info.hid;
+        document.getElementById('ic-dept').textContent   = info.dept;
+        document.getElementById('ic-type').textContent   = report['文档类型'] || '--';
 
         // 跑最后一步"报告生成"
         const items  = document.querySelectorAll('#flow-list .flow-item');
@@ -1266,30 +1257,74 @@ body {
             items[last].classList.add('done');
             badges[last].className = 'flow-badge done'; badges[last].textContent = '已完成';
 
-            // 填写结果摘要卡
             const defects = (report['检查结果'] || []).filter(c => c['结果'] === '不合规');
             const veto    = report['一票否决'] || {};
+            const serious = defects.filter(c => (c['扣分'] || 0) >= 10).length;
 
-            // 更新分数
+            // 更新主页结果摘要卡
             document.querySelector('.score-box.blue  .score-num').textContent = report['得分'] ?? '--';
             document.querySelector('.score-box.gray  .score-num').textContent = report['等级'] ?? '--';
             document.querySelector('.score-box.white .score-num').textContent = defects.length;
-            // 严重缺陷：扣分>=10
-            const serious = defects.filter(c => (c['扣分'] || 0) >= 10).length;
-            document.querySelectorAll('.score-box.pink .score-num')[0] && (document.querySelectorAll('.score-box.pink .score-num')[0].textContent = serious);
-            // 一票否决
-            const vetoBoxes = document.querySelectorAll('.score-box.white .score-num');
-            if (vetoBoxes[1]) vetoBoxes[1].textContent = veto['触发'] ? 1 : 0;
-
-            // 更新问题标签
+            const pinkBox = document.querySelector('.score-box.pink .score-num');
+            if (pinkBox) pinkBox.textContent = serious;
             const tagContainer = document.querySelector('.issue-tags');
             if (tagContainer) {
                 tagContainer.innerHTML = defects.length
                     ? defects.map(c => `<span class="issue-tag">${c['规则名称']}</span>`).join('')
                     : '<span class="issue-tag" style="background:#f0fdf4;color:#16a34a;">无缺陷</span>';
             }
-
             document.getElementById('result-section').style.display = 'block';
+
+            // 填充报告详情页
+            document.getElementById('rp-doc-type').textContent = '文档类型：' + (report['文档类型'] || '--');
+            document.getElementById('rp-full-text').textContent = text;
+            document.getElementById('rp-score').textContent   = report['得分'] ?? '--';
+            document.getElementById('rp-level').textContent   = report['等级'] ?? '--';
+            document.getElementById('rp-veto').textContent    = veto['触发'] ? '触发' : '无';
+            document.getElementById('rp-defect-count').textContent  = defects.length;
+            document.getElementById('rp-serious-count').textContent = serious;
+
+            // 缺陷定位（tab2）
+            const locEl = document.getElementById('rp-defect-locations');
+            locEl.innerHTML = defects.length
+                ? defects.map(c => `<p><strong>[${c['规则编号']}] ${c['规则名称']}</strong>（-${c['扣分']}分）：${c['原因']}</p>`).join('')
+                : '<p style="color:#16a34a;">未发现缺陷</p>';
+
+            // 缺陷建议列表
+            const defectsEl = document.getElementById('rp-defects-list');
+            if (defects.length === 0) {
+                defectsEl.innerHTML = '<p style="color:#16a34a;padding:12px 0;">未发现缺陷，病历质量良好。</p>';
+            } else {
+                defectsEl.innerHTML = defects.map(c => `
+                <div class="rp-defect-item">
+                    <div class="rp-defect-row1">
+                        <div class="rp-defect-name">${c['规则名称']}</div>
+                        <div class="rp-defect-score">-${c['扣分']}分</div>
+                    </div>
+                    <div class="rp-defect-tags">
+                        <span class="rp-dtag type">${c['规则编号']}</span>
+                        <span class="rp-dtag risk">${(c['扣分'] || 0) >= 10 ? '严重' : '一般'}</span>
+                    </div>
+                    <div class="rp-defect-info">
+                        <span><span class="k">问题描述：</span>${c['原因'] || '--'}</span>
+                        <span><span class="k">规则依据：</span>《病历书写基本规范》</span>
+                    </div>
+                    <div class="rp-defect-actions">
+                        <button class="rp-da-btn">确认</button>
+                        <button class="rp-da-btn">忽略</button>
+                        <button class="rp-da-btn primary">加入报告</button>
+                    </div>
+                </div>`).join('');
+            }
+
+            // 患者画像
+            document.getElementById('pt-name').textContent    = info.name;
+            document.getElementById('pt-gender').textContent  = info.gender;
+            document.getElementById('pt-hid').textContent     = info.hid;
+            document.getElementById('pt-dept').textContent    = info.dept;
+            document.getElementById('pt-doctype').textContent = report['文档类型'] || '--';
+            document.getElementById('pt-level').textContent   = report['等级'] || '--';
+            document.getElementById('pt-defects').textContent = defects.length + ' 项';
         }, 500);
     }
 </script>
