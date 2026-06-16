@@ -913,10 +913,12 @@ body {
             </div>
         </div>
         <div class="rp-meta">
-            <div class="rp-meta-item"><span class="lbl">患者名称</span><span class="val">王小明</span></div>
-            <div class="rp-meta-item"><span class="lbl">入院号</span><span class="val">123456</span></div>
-            <div class="rp-meta-item"><span class="lbl">部门</span><span class="val">呼吸医学</span></div>
-            <div class="rp-meta-item"><span class="lbl">上级医生</span><span class="val">张生</span></div>
+            <div class="rp-meta-item"><span class="lbl">患者名称</span><span class="val" id="rp-meta-name">--</span></div>
+            <div class="rp-meta-item"><span class="lbl">入院号</span><span class="val" id="rp-meta-hid">--</span></div>
+            <div class="rp-meta-item"><span class="lbl">科室</span><span class="val" id="rp-meta-dept">--</span></div>
+            <div class="rp-meta-item"><span class="lbl">文档类型</span><span class="val" id="rp-meta-doctype">--</span></div>
+            <div class="rp-meta-item"><span class="lbl">质检时间</span><span class="val" id="rp-meta-time">--</span></div>
+            <div class="rp-meta-item"><span class="lbl">质检等级</span><span class="val" id="rp-meta-level">--</span></div>
             <div class="rp-meta-item"><span class="lbl">检查时间</span><span class="val">2026-06-09 10:00</span></div>
             <div class="rp-meta-item"><span class="lbl">成分等级</span><span class="val">85/A</span></div>
         </div>
@@ -1352,39 +1354,27 @@ T:36.3℃ P:99次/分 R:20次/分 BP:144/85mmHg
             }
             document.getElementById('result-section').style.display = 'block';
 
-            // 填充报告详情页
-            document.getElementById('rp-doc-type').textContent = '文档类型：' + (report['文档类型'] || '--');
+            // 填充报告详情页 meta
+            const now = new Date().toLocaleString('zh-CN', {hour12:false});
+            document.getElementById('rp-meta-name').textContent    = info.name;
+            document.getElementById('rp-meta-hid').textContent     = info.hid;
+            document.getElementById('rp-meta-dept').textContent    = info.dept;
+            document.getElementById('rp-meta-doctype').textContent = report['文档类型'] || '--';
+            document.getElementById('rp-meta-time').textContent    = now;
+            document.getElementById('rp-meta-level').textContent   = (report['得分'] ?? '--') + '分 / ' + (report['等级'] || '--');
+            document.getElementById('rp-doc-type').textContent     = '文档类型：' + (report['文档类型'] || '--');
 
-            // 按关键词拆分病历文本到5个Tab
-            function extractSection(txt, keywords) {
-                for (const kw of keywords) {
-                    const idx = txt.indexOf(kw);
-                    if (idx !== -1) {
-                        // 找到下一个大段标题
-                        const after = txt.slice(idx);
-                        const nextSection = after.search(/\n(主诉|现病史|既往史|体格检查|辅助检查|初步诊断|入院诊断|出院诊断|出院医嘱|病程记录|首次病程|日常病程|出院记录|入院记录|病案首页)/);
-                        return nextSection > 100 ? after.slice(0, nextSection).trim() : after.slice(0, 800).trim();
-                    }
-                }
-                return null;
-            }
+            // 用 AI 拆分病历文本到5个段落（支持任意格式）
+            splitAndFillTabs(text, defects);
 
-            const sec1 = extractSection(text, ['病案首页','住院病案首页']) || text.slice(0, 600);
-            const sec2 = extractSection(text, ['入院记录','入院病历']) || text.slice(0, 1200);
-            const sec3 = extractSection(text, ['首次病程记录','首次病程']) || '本病历未包含首次病程记录内容。';
-            const sec4 = extractSection(text, ['病程记录','日常病程','查房记录']) || '本病历未包含日常病程记录内容。';
-            const sec5 = extractSection(text, ['出院记录','出院小结']) || '本病历未包含出院记录内容。';
-
-            document.getElementById('rp-full-text').textContent = sec1;
-            document.getElementById('rp-doc-2-text') && (document.getElementById('rp-doc-2-text').textContent = sec2);
-            document.getElementById('rp-doc-3-text') && (document.getElementById('rp-doc-3-text').textContent = sec3);
-            document.getElementById('rp-doc-4-text') && (document.getElementById('rp-doc-4-text').textContent = sec4);
-            document.getElementById('rp-doc-5-text') && (document.getElementById('rp-doc-5-text').textContent = sec5);
-            document.getElementById('rp-score').textContent   = report['得分'] ?? '--';
-            document.getElementById('rp-level').textContent   = report['等级'] ?? '--';
-            document.getElementById('rp-veto').textContent    = veto['触发'] ? '触发' : '无';
+            document.getElementById('rp-score').textContent         = report['得分'] ?? '--';
+            document.getElementById('rp-level').textContent         = report['等级'] ?? '--';
+            document.getElementById('rp-veto').textContent          = veto['触发'] ? '触发' : '无';
             document.getElementById('rp-defect-count').textContent  = defects.length;
             document.getElementById('rp-serious-count').textContent = serious;
+
+            // 质控面板：追加本次质检结果到历史列表
+            updateDashboard(info, report, defects);
 
             // 缺陷定位追加到入院记录Tab
             if (defects.length) {
@@ -1431,6 +1421,133 @@ T:36.3℃ P:99次/分 R:20次/分 BP:144/85mmHg
             document.getElementById('pt-level').textContent   = report['等级'] || '--';
             document.getElementById('pt-defects').textContent = defects.length + ' 项';
         }, 500);
+    }
+
+    // AI 辅助拆分病历文本到5个Tab，支持任意格式
+    async function splitAndFillTabs(text, defects) {
+        // 先用关键词快速拆（同步），让用户马上看到内容
+        function extract(txt, keys, fallback) {
+            for (const kw of keys) {
+                const idx = txt.indexOf(kw);
+                if (idx === -1) continue;
+                const after = txt.slice(idx);
+                // 找下一个大段落标题
+                const next = after.slice(1).search(/\n[一-龥]{2,8}[：:记录\n]/);
+                return (next > 80 ? after.slice(0, next + 1) : after.slice(0, 1500)).trim();
+            }
+            return fallback;
+        }
+
+        const MISSING = '本病历未包含此类文书内容。';
+        const sec1 = extract(text, ['病案首页','住院病案首页'], text.slice(0, 600));
+        const sec2 = extract(text, ['入院记录','入院病历'], text.slice(0, 2000));
+        const sec3 = extract(text, ['首次病程记录','首次病程'], MISSING);
+        const sec4 = extract(text, ['病程记录','日常病程','查房记录'], MISSING);
+        const sec5 = extract(text, ['出院记录','出院小结'], MISSING);
+
+        const setTab = (id, content) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = content;
+        };
+        setTab('rp-full-text',  sec1);
+        setTab('rp-doc-2-text', sec2);
+        setTab('rp-doc-3-text', sec3);
+        setTab('rp-doc-4-text', sec4);
+        setTab('rp-doc-5-text', sec5);
+
+        // 把缺陷定位追加到入院记录Tab末尾
+        if (defects.length) {
+            const doc2 = document.getElementById('rp-doc-2-text');
+            if (doc2) doc2.textContent += '\n\n━━ 质检问题定位 ━━\n' +
+                defects.map(c => `[${c['规则编号']}] ${c['规则名称']}（-${c['扣分']}分）\n原因：${c['原因']}`).join('\n\n');
+        }
+
+        // 如果文本够长，再用AI做精准拆分（异步补全，不阻塞）
+        if (text.length > 500) {
+            try {
+                const res = await fetch(AI_API_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json','Authorization':'Bearer '+AI_API_KEY},
+                    body: JSON.stringify({
+                        model: AI_MODEL,
+                        temperature: 0,
+                        messages: [{
+                            role: 'system',
+                            content: '你是病历文书拆分专家。从病历文本中提取以下5个段落，严格返回JSON，不加markdown：{"病案首页":"...","入院记录":"...","首次病程":"...","日常病程":"...","出院记录":"..."} 。如果某段落不存在，值填"本病历未包含此类文书内容。"'
+                        },{
+                            role: 'user',
+                            content: '请从以下病历中拆分各段落：\n\n' + text.slice(0, 6000)
+                        }]
+                    })
+                });
+                const data = await res.json();
+                const raw = data.choices[0].message.content.trim().replace(/^```json|```$/g,'');
+                const sections = JSON.parse(raw);
+                setTab('rp-full-text',  sections['病案首页'] || sec1);
+                setTab('rp-doc-2-text', (sections['入院记录'] || sec2) +
+                    (defects.length ? '\n\n━━ 质检问题定位 ━━\n' +
+                        defects.map(c=>`[${c['规则编号']}] ${c['规则名称']}（-${c['扣分']}分）\n原因：${c['原因']}`).join('\n\n') : ''));
+                setTab('rp-doc-3-text', sections['首次病程'] || sec3);
+                setTab('rp-doc-4-text', sections['日常病程'] || sec4);
+                setTab('rp-doc-5-text', sections['出院记录'] || sec5);
+            } catch(e) { /* 快速拆分结果保留，静默失败 */ }
+        }
+    }
+
+    // 质控面板：每次质检后动态追加本次结果到历史列表
+    let dashboardHistory = [];
+    function updateDashboard(info, report, defects) {
+        const entry = {
+            name: info.name,
+            dept: info.dept,
+            score: report['得分'],
+            level: report['等级'],
+            defectNames: defects.map(d => d['规则名称']).join('、') || '无缺陷',
+            veto: report['一票否决']?.['触发'] || false,
+            time: new Date().toLocaleString('zh-CN',{hour12:false})
+        };
+        dashboardHistory.unshift(entry);
+
+        // 更新 KPI
+        const scores = dashboardHistory.map(r=>r.score).filter(s=>s>0);
+        const avg = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : '--';
+        const qualified = dashboardHistory.filter(r=>r.score>=60).length;
+        const rate = dashboardHistory.length ? (qualified/dashboardHistory.length*100).toFixed(1)+'%' : '--';
+        const vetoCount = dashboardHistory.filter(r=>r.veto).length;
+        const defectCount = dashboardHistory.filter(r=>r.defectNames!=='无缺陷').length;
+
+        document.querySelectorAll('.db-kpi')[0]?.querySelector('.db-kpi-val')  && (document.querySelectorAll('.db-kpi')[0].querySelector('.db-kpi-val').textContent = dashboardHistory.length);
+        document.querySelectorAll('.db-kpi')[1]?.querySelector('.db-kpi-val')  && (document.querySelectorAll('.db-kpi')[1].querySelector('.db-kpi-val').textContent = avg);
+        document.querySelectorAll('.db-kpi')[2]?.querySelector('.db-kpi-val')  && (document.querySelectorAll('.db-kpi')[2].querySelector('.db-kpi-val').textContent = defectCount);
+        document.querySelectorAll('.db-kpi')[3]?.querySelector('.db-kpi-val')  && (document.querySelectorAll('.db-kpi')[3].querySelector('.db-kpi-val').textContent = vetoCount);
+        document.querySelectorAll('.db-kpi')[4]?.querySelector('.db-kpi-val')  && (document.querySelectorAll('.db-kpi')[4].querySelector('.db-kpi-val').textContent = rate);
+
+        // 更新病历明细表：在表格顶部插入新行
+        const tbody = document.querySelector('.db-table tbody');
+        if (tbody) {
+            const scoreColor = entry.score >= 90 ? '#16a34a' : entry.score >= 75 ? '#d97706' : '#ef4444';
+            const badgeClass = entry.score >= 90 ? 'low' : entry.score >= 75 ? 'mid' : 'high';
+            const badgeText  = entry.level;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${entry.name}</td>
+                <td>${entry.dept || '黔东南州人民医院'}</td>
+                <td style="color:${scoreColor};font-weight:600;">${entry.score}</td>
+                <td><span class="db-badge ${badgeClass}">${badgeText}</span></td>
+                <td>${entry.defectNames}</td>`;
+            tbody.insertBefore(tr, tbody.firstChild);
+        }
+
+        // 更新柱状图：插入新条目
+        const barContainer = document.querySelector('.db-card:nth-child(1) .db-bar-row')?.parentElement;
+        if (barContainer) {
+            const pct = entry.score;
+            const barColor = pct >= 90 ? '#2563eb' : pct >= 75 ? '#f59e0b' : '#ef4444';
+            const div = document.createElement('div');
+            div.className = 'db-bar-row';
+            div.innerHTML = `<div class="db-bar-label">${entry.name}</div><div class="db-bar-track"><div class="db-bar-fill" style="width:${pct}%;background:${barColor};"></div></div><div class="db-bar-num">${pct}</div>`;
+            barContainer.insertBefore(div, barContainer.firstChild);
+        }
     }
 </script>
 </body>
