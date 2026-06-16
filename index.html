@@ -1145,11 +1145,35 @@ body {
         document.getElementById(panelId).classList.add('active');
     }
 
-    function startCheck() {
+    const AI_API_URL = 'https://tok.fan/v1/chat/completions';
+    const AI_API_KEY = 'sk-o8adBy79bX7Zv2zdwI3JFFdafC0Xxyqd1TefHmChjJIImUU0';
+    const AI_MODEL   = 'gpt-5.4-mini';
+    const QC_SYSTEM_PROMPT = `你是一个专业的病历质检专家。用户会给你一段病历文本，你需要对其进行全面质检。
+严格按照以下JSON格式返回结果，不要返回任何其他内容，不要加markdown代码块：
+{
+  "文档类型": "门诊病历",
+  "一票否决": {"触发": false, "触发项": []},
+  "检查结果": [
+    {"规则编号": "COMMON-001", "规则名称": "主诉完整", "结果": "合规", "原因": "", "扣分": 0}
+  ],
+  "总扣分": 0,
+  "得分": 100,
+  "等级": "甲级"
+}
+质检维度包括：主诉完整性、现病史完整性、基本信息（姓名/性别/年龄）、诊断明确性、医师签名、时间逻辑、用药合理性、检查结果记录。
+等级规则：90分以上甲级，75-89乙级，60-74丙级，60以下不合格。
+一票否决情形：无主诉、无诊断、涉及死亡未说明原因。`;
+
+    // 当前质检结果，供详情页使用
+    let lastReport = null;
+    let lastText   = '';
+
+    async function startCheck() {
         const text = document.getElementById('medical-text').value.trim();
         if (!text) { alert('请先输入病历文本'); return; }
+        lastText = text;
 
-        // 显示识别信息
+        // 显示识别信息条
         document.getElementById('info-strip').style.display = 'block';
 
         // 切换右侧为运行态
@@ -1161,26 +1185,112 @@ body {
         const dots   = document.querySelectorAll('#flow-list .flow-dot');
         const badges = document.querySelectorAll('#flow-list .flow-badge');
 
-        // 重置
+        // 重置流程步骤
         dots.forEach((d,i) => { d.className='flow-dot pending'; d.textContent=''; items[i].classList.remove('done'); });
         badges.forEach(b => { b.className='flow-badge waiting'; b.textContent='等待中'; });
 
-        let i = 0;
-        function runStep() {
-            if (i >= items.length) return;
-            dots[i].className = 'flow-dot running'; dots[i].textContent = '⟳';
-            badges[i].className = 'flow-badge running'; badges[i].textContent = '进行中';
-            const cur = i;
+        // 步骤1-4：动画推进，同时在后台调 API
+        const stepLabels = ['文本解析','字段抽取','规则匹配','缺陷归类','报告生成'];
+        let stepIdx = 0;
+
+        function advanceStep(cb) {
+            if (stepIdx >= items.length) { cb && cb(); return; }
+            dots[stepIdx].className = 'flow-dot running'; dots[stepIdx].textContent = '⟳';
+            badges[stepIdx].className = 'flow-badge running'; badges[stepIdx].textContent = '进行中';
+            const cur = stepIdx;
             setTimeout(() => {
                 dots[cur].className = 'flow-dot done'; dots[cur].textContent = '✓';
                 items[cur].classList.add('done');
                 badges[cur].className = 'flow-badge done'; badges[cur].textContent = '已完成';
-                i++;
-                if (i < items.length) setTimeout(runStep, 300);
-                else setTimeout(() => { document.getElementById('result-section').style.display = 'block'; }, 400);
-            }, 900);
+                stepIdx++;
+                cb && cb();
+            }, 600);
         }
-        setTimeout(runStep, 200);
+
+        // 并行：动画跑前4步 + 发 API 请求
+        let apiDone = false, animDone = false;
+        let report = null;
+
+        function tryShowResult() {
+            if (!apiDone || !animDone) return;
+            renderResult(report);
+        }
+
+        // 动画跑前4步
+        function runAnim(n) {
+            if (n === 0) { animDone = true; tryShowResult(); return; }
+            advanceStep(() => runAnim(n - 1));
+        }
+        runAnim(4);
+
+        // 调 API
+        try {
+            const res = await fetch(AI_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AI_API_KEY },
+                body: JSON.stringify({
+                    model: AI_MODEL,
+                    messages: [
+                        { role: 'system', content: QC_SYSTEM_PROMPT },
+                        { role: 'user',   content: '请对以下病历进行质检：\n\n' + text }
+                    ],
+                    temperature: 0.1
+                })
+            });
+            const data = await res.json();
+            const raw = data.choices[0].message.content.trim();
+            report = JSON.parse(raw);
+        } catch(e) {
+            report = {
+                "文档类型": "未知", "一票否决": {"触发": false, "触发项": []},
+                "检查结果": [], "总扣分": 0, "得分": 0, "等级": "解析失败",
+                "_error": e.message
+            };
+        }
+        apiDone = true;
+        tryShowResult();
+    }
+
+    function renderResult(report) {
+        lastReport = report;
+
+        // 跑最后一步"报告生成"
+        const items  = document.querySelectorAll('#flow-list .flow-item');
+        const dots   = document.querySelectorAll('#flow-list .flow-dot');
+        const badges = document.querySelectorAll('#flow-list .flow-badge');
+        const last = items.length - 1;
+        dots[last].className = 'flow-dot running'; dots[last].textContent = '⟳';
+        badges[last].className = 'flow-badge running'; badges[last].textContent = '进行中';
+        setTimeout(() => {
+            dots[last].className = 'flow-dot done'; dots[last].textContent = '✓';
+            items[last].classList.add('done');
+            badges[last].className = 'flow-badge done'; badges[last].textContent = '已完成';
+
+            // 填写结果摘要卡
+            const defects = (report['检查结果'] || []).filter(c => c['结果'] === '不合规');
+            const veto    = report['一票否决'] || {};
+
+            // 更新分数
+            document.querySelector('.score-box.blue  .score-num').textContent = report['得分'] ?? '--';
+            document.querySelector('.score-box.gray  .score-num').textContent = report['等级'] ?? '--';
+            document.querySelector('.score-box.white .score-num').textContent = defects.length;
+            // 严重缺陷：扣分>=10
+            const serious = defects.filter(c => (c['扣分'] || 0) >= 10).length;
+            document.querySelectorAll('.score-box.pink .score-num')[0] && (document.querySelectorAll('.score-box.pink .score-num')[0].textContent = serious);
+            // 一票否决
+            const vetoBoxes = document.querySelectorAll('.score-box.white .score-num');
+            if (vetoBoxes[1]) vetoBoxes[1].textContent = veto['触发'] ? 1 : 0;
+
+            // 更新问题标签
+            const tagContainer = document.querySelector('.issue-tags');
+            if (tagContainer) {
+                tagContainer.innerHTML = defects.length
+                    ? defects.map(c => `<span class="issue-tag">${c['规则名称']}</span>`).join('')
+                    : '<span class="issue-tag" style="background:#f0fdf4;color:#16a34a;">无缺陷</span>';
+            }
+
+            document.getElementById('result-section').style.display = 'block';
+        }, 500);
     }
 </script>
 </body>
