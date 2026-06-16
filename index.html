@@ -907,9 +907,9 @@ body {
         <div class="rp-header-top">
             <div class="rp-title">病历智能质控评估报告</div>
             <div class="rp-btns">
-                <button class="rp-btn secondary" onclick="showReport(false)">返回列表</button>
-                <button class="rp-btn primary">重新质检</button>
-                <button class="rp-btn primary">导出报告</button>
+                <button class="rp-btn secondary" onclick="showReport(false)">← 返回列表</button>
+                <button class="rp-btn secondary" onclick="showReport(false); startCheck()">重新质检</button>
+                <button class="rp-btn primary" onclick="exportReport()">导出报告</button>
             </div>
         </div>
         <div class="rp-meta">
@@ -1042,7 +1042,7 @@ body {
                             <tr><td class="k">质检等级</td><td class="v" id="pt-level">--</td></tr>
                             <tr><td class="k">缺陷数</td><td class="v" id="pt-defects">--</td></tr>
                         </table>
-                        <button style="width:100%;margin-top:12px;padding:9px 0;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;">导出报告</button>
+                        <button style="width:100%;margin-top:12px;padding:9px 0;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;" onclick="exportReport()">导出报告</button>
                     </div>
                 </div>
             </div>
@@ -1195,21 +1195,60 @@ T:36.3℃ P:99次/分 R:20次/分 BP:144/85mmHg
     const AI_API_URL = 'https://tok.fan/v1/chat/completions';
     const AI_API_KEY = 'sk-o8adBy79bX7Zv2zdwI3JFFdafC0Xxyqd1TefHmChjJIImUU0';
     const AI_MODEL   = 'gpt-5.4-mini';
-    const QC_SYSTEM_PROMPT = `你是一个专业的病历质检专家。用户会给你一段病历文本，你需要对其进行全面质检。
-严格按照以下JSON格式返回结果，不要返回任何其他内容，不要加markdown代码块：
+
+    const QC_SYSTEM_PROMPT = `你是专业住院病历质控专家，严格依据以下规则库逐条评审病历，不得敷衍或捏造结论。
+
+【评分结构】总分100分：病案首页15分、入院记录20分、病程记录30分、知情同意15分、出院记录10分、归档完整性10分。
+
+【一票否决规则】触发任意一条直接判定丙级：
+VETO-001 无入院记录；VETO-002 无首次病程记录；VETO-003 有手术无手术记录；VETO-004 无出院/死亡记录；VETO-005 死亡病例无死亡讨论；VETO-006 缺关键知情同意书；VETO-007 伪造篡改病历；VETO-008 主诊断严重错误。
+
+【入院记录规则（20分）】
+ADM-001 主诉规范不超过20字，体现主症+时间，违反扣1-3分
+ADM-002 现病史须含：起病情况、症状特点、伴随症状、诊治经过、一般情况，每缺一项扣2分最多扣6分
+ADM-003 现病史须与主诉呼应，不呼应扣2分
+ADM-004 既往史须含：健康状况、疾病史、传染病史、手术史、输血史、过敏史，每缺一项扣1分
+ADM-005 个人史须含：出生地、生活习惯、职业史，每缺一项扣1分
+ADM-006 女性患者须有月经史婚育史，缺失扣1-2分
+ADM-007 家族史须记录父母健康及遗传病情况，缺失扣1分
+ADM-008 体格检查须按系统全面记录含专科检查，不全酌情扣分
+ADM-009 初步诊断须完整有依据，不完整扣1-3分
+ADM-011 入院记录须有书写医师签名，缺签名扣2分
+
+【病程记录规则（30分）】
+PROG-001 首次病程须含：病例特点、拟诊讨论、诊疗计划，缺任意一项扣2-4分，无记录扣5分
+PROG-002 三级查房记录须有上级医师诊疗意见，缺失每次扣2-4分
+PROG-003 危重患者每天至少一次病程记录，不达标酌情扣分
+PROG-004 病程记录须有实质内容（病情变化+治疗调整），空洞流水账扣2-4分
+
+【出院记录规则（10分）】
+DISCH-001 出院记录须含：入出院日期、入出院诊断、诊疗经过、出院医嘱，缺失扣1-4分
+DISCH-002 出院诊断须与首页一致，不一致扣2分
+
+【首页基本信息规则（15分）】
+FP-BASE-B001 病案号必填，缺失扣2分
+FP-BASE-C001~C003 性别/出生日期/年龄必填，每缺一项扣1分
+
+【书写格式规则】
+FMT-001 字迹清晰无涂改，有涂改须符合规范，违反扣1分
+FMT-002 日期时间记录规范，格式错误扣1分
+FMT-003 医师签名规范完整，缺失扣1-2分
+
+【等级判定】甲级：≥90分且无一票否决；乙级：76-89分；丙级：≤75分或触发一票否决。
+
+【输出格式】严格返回如下JSON，不加markdown，不加解释：
 {
-  "文档类型": "门诊病历",
+  "文档类型": "入院记录",
   "一票否决": {"触发": false, "触发项": []},
   "检查结果": [
-    {"规则编号": "COMMON-001", "规则名称": "主诉完整", "结果": "合规", "原因": "", "扣分": 0}
+    {"规则编号": "ADM-001", "规则名称": "主诉规范", "结果": "合规", "原因": "主诉简洁明了，含主症和时间", "扣分": 0},
+    {"规则编号": "ADM-002", "规则名称": "现病史完整", "结果": "不合规", "原因": "缺少发病以来一般情况描述", "扣分": 2}
   ],
-  "总扣分": 0,
-  "得分": 100,
+  "总扣分": 2,
+  "得分": 98,
   "等级": "甲级"
 }
-质检维度包括：主诉完整性、现病史完整性、基本信息（姓名/性别/年龄）、诊断明确性、医师签名、时间逻辑、用药合理性、检查结果记录。
-等级规则：90分以上甲级，75-89乙级，60-74丙级，60以下不合格。
-一票否决情形：无主诉、无诊断、涉及死亡未说明原因。`;
+要求：每条规则都必须出现在检查结果中（适用的规则），结论必须基于病历实际内容，原因字段必须引用病历原文具体内容作为依据，不得泛泛而论。`;
 
     // 当前质检结果，供详情页使用
     let lastReport = null;
@@ -1285,7 +1324,12 @@ T:36.3℃ P:99次/分 R:20次/分 BP:144/85mmHg
                 })
             });
             const data = await res.json();
-            const raw = data.choices[0].message.content.trim();
+            let raw = data.choices[0].message.content.trim();
+            // 清除模型可能加的 markdown 代码块
+            raw = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'');
+            // 找第一个 { 防止前缀文字
+            const jsonStart = raw.indexOf('{');
+            if (jsonStart > 0) raw = raw.slice(jsonStart);
             report = JSON.parse(raw);
         } catch(e) {
             report = {
@@ -1548,6 +1592,46 @@ T:36.3℃ P:99次/分 R:20次/分 BP:144/85mmHg
             div.innerHTML = `<div class="db-bar-label">${entry.name}</div><div class="db-bar-track"><div class="db-bar-fill" style="width:${pct}%;background:${barColor};"></div></div><div class="db-bar-num">${pct}</div>`;
             barContainer.insertBefore(div, barContainer.firstChild);
         }
+    }
+
+    function exportReport() {
+        if (!lastReport) { alert('请先完成质检'); return; }
+        const info = parsePatientInfo(lastText);
+        const defects = (lastReport['检查结果'] || []).filter(c => c['结果'] === '不合规');
+        const now = new Date().toLocaleString('zh-CN', {hour12: false});
+
+        let lines = [];
+        lines.push('病历智能质控评估报告');
+        lines.push('='.repeat(40));
+        lines.push(`质检时间：${now}`);
+        lines.push(`患者姓名：${info.name}　科室：${info.dept}　住院号：${info.hid}`);
+        lines.push(`文档类型：${lastReport['文档类型'] || '--'}`);
+        lines.push('');
+        lines.push(`【质检得分】${lastReport['得分']} 分　等级：${lastReport['等级']}`);
+        lines.push(`【总扣分】${lastReport['总扣分']} 分`);
+        lines.push(`【一票否决】${lastReport['一票否决']?.['触发'] ? '触发（' + lastReport['一票否决']['触发项'].join('、') + '）' : '未触发'}`);
+        lines.push('');
+        lines.push('【缺陷列表】');
+        if (defects.length === 0) {
+            lines.push('  未发现缺陷，病历质量良好。');
+        } else {
+            defects.forEach(c => {
+                lines.push(`  [${c['规则编号']}] ${c['规则名称']}　扣${c['扣分']}分`);
+                lines.push(`  原因：${c['原因']}`);
+                lines.push('');
+            });
+        }
+        lines.push('='.repeat(40));
+        lines.push('【病历原文节选】');
+        lines.push(lastText.slice(0, 1000) + (lastText.length > 1000 ? '\n...(以下内容已省略)' : ''));
+
+        const blob = new Blob([lines.join('\n')], {type: 'text/plain;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `质控报告_${info.name}_${now.replace(/[/:]/g,'-')}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
     }
 </script>
 </body>
