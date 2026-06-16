@@ -459,11 +459,11 @@ body {
                         <div class="sub-card">
                             <div class="sub-card-title">质检流程卡</div>
                             <div class="flow-list" id="flow-list">
-                                <div class="flow-item"><div class="flow-dot pending"></div><div class="flow-label">文本解析</div><div class="flow-badge waiting">已状态</div></div>
-                                <div class="flow-item"><div class="flow-dot pending"></div><div class="flow-label">字段抽取</div><div class="flow-badge waiting">已状态</div></div>
+                                <div class="flow-item"><div class="flow-dot pending"></div><div class="flow-label">文本解析</div><div class="flow-badge waiting"></div></div>
+                                <div class="flow-item"><div class="flow-dot pending"></div><div class="flow-label">字段抽取</div><div class="flow-badge waiting"></div></div>
                                 <div class="flow-item"><div class="flow-dot pending"></div><div class="flow-label">规则匹配</div><div class="flow-badge waiting"></div></div>
-                                <div class="flow-item"><div class="flow-dot pending"></div><div class="flow-label">缺陷归类</div><div class="flow-badge waiting">已状态</div></div>
-                                <div class="flow-item"><div class="flow-dot pending"></div><div class="flow-label">报告生成</div><div class="flow-badge waiting">已状态</div></div>
+                                <div class="flow-item"><div class="flow-dot pending"></div><div class="flow-label">缺陷归类</div><div class="flow-badge waiting"></div></div>
+                                <div class="flow-item"><div class="flow-dot pending"></div><div class="flow-label">报告生成</div><div class="flow-badge waiting"></div></div>
                             </div>
                         </div>
                     </div>
@@ -919,8 +919,6 @@ body {
             <div class="rp-meta-item"><span class="lbl">文档类型</span><span class="val" id="rp-meta-doctype">--</span></div>
             <div class="rp-meta-item"><span class="lbl">质检时间</span><span class="val" id="rp-meta-time">--</span></div>
             <div class="rp-meta-item"><span class="lbl">质检等级</span><span class="val" id="rp-meta-level">--</span></div>
-            <div class="rp-meta-item"><span class="lbl">检查时间</span><span class="val">2026-06-09 10:00</span></div>
-            <div class="rp-meta-item"><span class="lbl">成分等级</span><span class="val">85/A</span></div>
         </div>
     </div>
 
@@ -1002,32 +1000,8 @@ body {
 
                     <!-- 质检步骤 -->
                     <div class="rp-tab-panel" id="rp-steps">
-                        <div style="display:flex; flex-direction:column; gap:8px; padding:4px 0;">
-                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
-                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
-                                <span style="flex:1;color:#374151;">文本解析</span>
-                                <span style="color:#10b981;font-size:12px;">已完成</span>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
-                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
-                                <span style="flex:1;color:#374151;">字段抽取</span>
-                                <span style="color:#10b981;font-size:12px;">已完成</span>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
-                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
-                                <span style="flex:1;color:#374151;">规则匹配</span>
-                                <span style="color:#10b981;font-size:12px;">已完成</span>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
-                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
-                                <span style="flex:1;color:#374151;">缺陷归类</span>
-                                <span style="color:#10b981;font-size:12px;">已完成</span>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
-                                <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
-                                <span style="flex:1;color:#374151;">报告生成</span>
-                                <span style="color:#10b981;font-size:12px;">已完成</span>
-                            </div>
+                        <div id="rp-steps-content" style="display:flex; flex-direction:column; gap:8px; padding:4px 0;">
+                            <div style="color:#9ca3af;font-size:13px;">质检完成后将显示实际执行步骤。</div>
                         </div>
                     </div>
 
@@ -1454,6 +1428,27 @@ FMT-003 医师签名规范完整，缺失扣1-2分
                         <button class="rp-da-btn primary">加入报告</button>
                     </div>
                 </div>`).join('');
+            }
+
+            // 填充质检步骤 Tab（真实执行结果）
+            const stepsEl = document.getElementById('rp-steps-content');
+            if (stepsEl) {
+                const allRules = report['检查结果'] || [];
+                const compliant = allRules.filter(c => c['结果'] === '合规').length;
+                const nonCompliant = allRules.filter(c => c['结果'] === '不合规').length;
+                const stepData = [
+                    { label: '文本解析',  detail: `识别文档类型：${report['文档类型'] || '--'}` },
+                    { label: '字段抽取',  detail: `提取患者信息：${info.name} / ${info.dept}` },
+                    { label: '规则匹配',  detail: `共匹配 ${allRules.length} 条规则` },
+                    { label: '缺陷归类',  detail: `合规 ${compliant} 条，不合规 ${nonCompliant} 条` },
+                    { label: '报告生成',  detail: `得分 ${report['得分']} 分，等级 ${report['等级']}` },
+                ];
+                stepsEl.innerHTML = stepData.map(s => `
+                    <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+                        <div style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
+                        <span style="flex:1;color:#374151;">${s.label}</span>
+                        <span style="color:#6b7280;font-size:12px;">${s.detail}</span>
+                    </div>`).join('');
             }
 
             // 患者画像
