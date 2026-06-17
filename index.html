@@ -596,29 +596,29 @@ body {
     <!-- KPI 卡片 -->
     <div class="db-kpi-row">
         <div class="db-kpi">
-            <div class="db-kpi-label">本批质检总量</div>
-            <div class="db-kpi-val blue">14</div>
-            <div class="db-kpi-trend up">↑ 黔东南州人民医院</div>
+            <div class="db-kpi-label">质检总量</div>
+            <div class="db-kpi-val blue">0</div>
+            <div class="db-kpi-trend">--</div>
         </div>
         <div class="db-kpi">
-            <div class="db-kpi-label">平均质检评分</div>
-            <div class="db-kpi-val green">93.6</div>
-            <div class="db-kpi-trend up">↑ 高于基准线 +3.6分</div>
+            <div class="db-kpi-label">平均评分</div>
+            <div class="db-kpi-val green">--</div>
+            <div class="db-kpi-trend">--</div>
         </div>
         <div class="db-kpi">
             <div class="db-kpi-label">缺陷病历数</div>
-            <div class="db-kpi-val orange">4</div>
-            <div class="db-kpi-trend down">其中不合格 1 份</div>
+            <div class="db-kpi-val orange">0</div>
+            <div class="db-kpi-trend">--</div>
         </div>
         <div class="db-kpi">
             <div class="db-kpi-label">一票否决数</div>
-            <div class="db-kpi-val red">1</div>
-            <div class="db-kpi-trend down">王文兰病历触发</div>
+            <div class="db-kpi-val red">0</div>
+            <div class="db-kpi-trend">暂无触发</div>
         </div>
         <div class="db-kpi">
             <div class="db-kpi-label">合格率</div>
-            <div class="db-kpi-val green">92.9%</div>
-            <div class="db-kpi-trend up">甲级 12 份 / 丙级 1 份</div>
+            <div class="db-kpi-val green">--</div>
+            <div class="db-kpi-trend">--</div>
         </div>
     </div>
 
@@ -626,77 +626,23 @@ body {
     <div class="db-row2">
         <!-- 月度趋势图 -->
         <div class="db-card">
-            <div class="db-card-title">月度质检评分趋势 <span>近6个月</span></div>
-            <svg class="db-chart" viewBox="0 0 520 160" preserveAspectRatio="none">
-                <!-- 网格线 -->
-                <line x1="40" y1="20" x2="510" y2="20" stroke="#f3f4f6" stroke-width="1"/>
-                <line x1="40" y1="50" x2="510" y2="50" stroke="#f3f4f6" stroke-width="1"/>
-                <line x1="40" y1="80" x2="510" y2="80" stroke="#f3f4f6" stroke-width="1"/>
-                <line x1="40" y1="110" x2="510" y2="110" stroke="#f3f4f6" stroke-width="1"/>
-                <line x1="40" y1="140" x2="510" y2="140" stroke="#f3f4f6" stroke-width="1"/>
-                <!-- Y轴标签 100~60 -->
-                <text x="35" y="24" text-anchor="end" font-size="10" fill="#9ca3af">100</text>
-                <text x="35" y="54" text-anchor="end" font-size="10" fill="#9ca3af">95</text>
-                <text x="35" y="84" text-anchor="end" font-size="10" fill="#9ca3af">90</text>
-                <text x="35" y="114" text-anchor="end" font-size="10" fill="#9ca3af">80</text>
-                <text x="35" y="144" text-anchor="end" font-size="10" fill="#9ca3af">60</text>
-                <!-- X轴：各科室/批次 -->
-                <text x="90"  y="158" text-anchor="middle" font-size="10" fill="#9ca3af">吴光芬</text>
-                <text x="172" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">周启福</text>
-                <text x="254" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">李治花</text>
-                <text x="336" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">王文兰</text>
-                <text x="418" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">姜老奶</text>
-                <text x="500" y="158" text-anchor="middle" font-size="10" fill="#9ca3af">张花万</text>
-                <!-- 分数映射：100→20, 90→56, 70→112, 50→140（Y轴范围60-100）-->
-                <!-- 100分→y=20, 90分→y=57, 70分→y=120, 50分→y=140 -->
-                <polygon points="90,20 172,120 254,57 336,140 418,20 500,20 500,140 90,140" fill="#eff6ff" opacity="0.6"/>
-                <polyline points="90,20 172,120 254,57 336,140 418,20 500,20" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linejoin="round"/>
-                <circle cx="90"  cy="20"  r="4" fill="#2563eb"/>
-                <circle cx="172" cy="120" r="4" fill="#ef4444"/>
-                <circle cx="254" cy="57"  r="4" fill="#2563eb"/>
-                <circle cx="336" cy="140" r="5" fill="#ef4444" stroke="#fff" stroke-width="2"/>
-                <circle cx="418" cy="20"  r="4" fill="#2563eb"/>
-                <circle cx="500" cy="20"  r="4" fill="#2563eb"/>
-                <text x="90"  y="15"  text-anchor="middle" font-size="10" fill="#2563eb">100</text>
-                <text x="172" y="115" text-anchor="middle" font-size="10" fill="#ef4444">70</text>
-                <text x="254" y="52"  text-anchor="middle" font-size="10" fill="#2563eb">90</text>
-                <text x="336" y="135" text-anchor="middle" font-size="10" fill="#ef4444">50</text>
-                <text x="418" y="15"  text-anchor="middle" font-size="10" fill="#2563eb">100</text>
-                <text x="500" y="15"  text-anchor="middle" font-size="10" fill="#2563eb">100</text>
+            <div class="db-card-title">质检评分趋势 <span>最近质检</span></div>
+            <svg id="db-trend-svg" class="db-chart" viewBox="0 0 520 160" preserveAspectRatio="xMidYMid meet">
+                <text x="260" y="85" text-anchor="middle" font-size="12" fill="#d1d5db">质检完成后显示趋势图</text>
             </svg>
         </div>
 
         <!-- 缺陷类型分布 -->
         <div class="db-card">
-            <div class="db-card-title">缺陷类型分布 <span>本月</span></div>
+            <div class="db-card-title">缺陷类型分布 <span>累计</span></div>
             <div class="db-donut-wrap">
-                <svg width="110" height="110" viewBox="0 0 110 110">
-                    <!-- 环形图近似用多段弧 -->
+                <svg id="db-donut-svg" width="110" height="110" viewBox="0 0 110 110">
                     <circle cx="55" cy="55" r="40" fill="none" stroke="#e5e7eb" stroke-width="18"/>
-                    <!-- 时间逻辑 34% -->
-                    <circle cx="55" cy="55" r="40" fill="none" stroke="#2563eb" stroke-width="18"
-                        stroke-dasharray="85 166" stroke-dashoffset="0" transform="rotate(-90 55 55)"/>
-                    <!-- 签名缺失 22% -->
-                    <circle cx="55" cy="55" r="40" fill="none" stroke="#60a5fa" stroke-width="18"
-                        stroke-dasharray="55 196" stroke-dashoffset="-85" transform="rotate(-90 55 55)"/>
-                    <!-- 内容缺陷 18% -->
-                    <circle cx="55" cy="55" r="40" fill="none" stroke="#f59e0b" stroke-width="18"
-                        stroke-dasharray="45 206" stroke-dashoffset="-140" transform="rotate(-90 55 55)"/>
-                    <!-- 病案首页 14% -->
-                    <circle cx="55" cy="55" r="40" fill="none" stroke="#ef4444" stroke-width="18"
-                        stroke-dasharray="35 216" stroke-dashoffset="-185" transform="rotate(-90 55 55)"/>
-                    <!-- 其他 12% -->
-                    <circle cx="55" cy="55" r="40" fill="none" stroke="#d1d5db" stroke-width="18"
-                        stroke-dasharray="30 221" stroke-dashoffset="-220" transform="rotate(-90 55 55)"/>
-                    <text x="55" y="51" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">236</text>
+                    <text x="55" y="51" text-anchor="middle" font-size="13" font-weight="700" fill="#9ca3af">0</text>
                     <text x="55" y="64" text-anchor="middle" font-size="10" fill="#9ca3af">缺陷总数</text>
                 </svg>
-                <div class="db-donut-legend">
-                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#2563eb"></div>主诉完整 29%</div>
-                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#60a5fa"></div>现病史一致性 14%</div>
-                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#f59e0b"></div>辅助检查记录 14%</div>
-                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#ef4444"></div>基本信息一致性 14%</div>
-                    <div class="db-legend-item"><div class="db-legend-dot" style="background:#d1d5db"></div>其他 29%</div>
+                <div id="db-donut-legend" class="db-donut-legend">
+                    <div style="font-size:12px;color:#9ca3af;">质检完成后显示</div>
                 </div>
             </div>
         </div>
@@ -706,73 +652,27 @@ body {
     <div class="db-row3">
         <!-- 科室评分排名 -->
         <div class="db-card">
-            <div class="db-card-title">病历质检评分分布 <span>本批 14 份</span></div>
-            <div class="db-bar-row"><div class="db-bar-label">吴光芬</div><div class="db-bar-track"><div class="db-bar-fill" style="width:100%;background:#2563eb;"></div></div><div class="db-bar-num">100</div></div>
-            <div class="db-bar-row"><div class="db-bar-label">姜老奶</div><div class="db-bar-track"><div class="db-bar-fill" style="width:100%;background:#2563eb;"></div></div><div class="db-bar-num">100</div></div>
-            <div class="db-bar-row"><div class="db-bar-label">张花万</div><div class="db-bar-track"><div class="db-bar-fill" style="width:100%;background:#2563eb;"></div></div><div class="db-bar-num">100</div></div>
-            <div class="db-bar-row"><div class="db-bar-label">杨贵强</div><div class="db-bar-track"><div class="db-bar-fill" style="width:100%;background:#2563eb;"></div></div><div class="db-bar-num">100</div></div>
-            <div class="db-bar-row"><div class="db-bar-label">潘世伟</div><div class="db-bar-track"><div class="db-bar-fill" style="width:100%;background:#2563eb;"></div></div><div class="db-bar-num">100</div></div>
-            <div class="db-bar-row"><div class="db-bar-label">李治花</div><div class="db-bar-track"><div class="db-bar-fill" style="width:90%;background:#3b82f6;"></div></div><div class="db-bar-num">90</div></div>
-            <div class="db-bar-row"><div class="db-bar-label">周启福</div><div class="db-bar-track"><div class="db-bar-fill" style="width:70%;background:#f59e0b;"></div></div><div class="db-bar-num">70</div></div>
-            <div class="db-bar-row"><div class="db-bar-label">王文兰</div><div class="db-bar-track"><div class="db-bar-fill" style="width:50%;background:#ef4444;"></div></div><div class="db-bar-num">50</div></div>
+            <div class="db-card-title">病历质检评分分布 <span id="db-bar-title">共 0 份</span></div>
+            <div id="db-bar-container">
+                <div style="font-size:12px;color:#9ca3af;padding:20px 0 10px;">质检完成后显示评分分布</div>
+            </div>
         </div>
 
         <!-- 问题病历明细 -->
         <div class="db-card">
-            <div class="db-card-title">近期问题病历明细 <span>需关注</span></div>
+            <div class="db-card-title">病历质检明细 <span>按问题优先排序</span></div>
             <table class="db-table">
                 <thead>
                     <tr>
-                        <th>患者/住院号</th>
+                        <th>患者</th>
                         <th>科室</th>
                         <th>评分</th>
-                        <th>风险</th>
+                        <th>等级</th>
                         <th>主要缺陷</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>王文兰</td>
-                        <td>黔东南州人民医院</td>
-                        <td style="color:#ef4444;font-weight:600;">50</td>
-                        <td><span class="db-badge high">不合格</span></td>
-                        <td>主诉完整、基本信息一致性、性别一致性</td>
-                    </tr>
-                    <tr>
-                        <td>周启福</td>
-                        <td>黔东南州人民医院</td>
-                        <td style="color:#ef4444;font-weight:600;">70</td>
-                        <td><span class="db-badge high">丙级</span></td>
-                        <td>主诉完整、现病史与主诉一致、辅助检查记录规范</td>
-                    </tr>
-                    <tr>
-                        <td>李治花</td>
-                        <td>黔东南州人民医院</td>
-                        <td style="color:#16a34a;font-weight:600;">90</td>
-                        <td><span class="db-badge low">甲级</span></td>
-                        <td>诊断依据不足</td>
-                    </tr>
-                    <tr>
-                        <td>吴光芬</td>
-                        <td>黔东南州人民医院</td>
-                        <td style="color:#16a34a;font-weight:600;">100</td>
-                        <td><span class="db-badge low">甲级</span></td>
-                        <td>无缺陷</td>
-                    </tr>
-                    <tr>
-                        <td>姜老奶</td>
-                        <td>黔东南州人民医院</td>
-                        <td style="color:#16a34a;font-weight:600;">100</td>
-                        <td><span class="db-badge low">甲级</span></td>
-                        <td>无缺陷</td>
-                    </tr>
-                    <tr>
-                        <td>张花万</td>
-                        <td>黔东南州人民医院</td>
-                        <td style="color:#16a34a;font-weight:600;">100</td>
-                        <td><span class="db-badge low">甲级</span></td>
-                        <td>无缺陷</td>
-                    </tr>
+                <tbody id="db-detail-tbody">
+                    <tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:20px 0;">质检完成后显示明细</td></tr>
                 </tbody>
             </table>
         </div>
@@ -1562,54 +1462,139 @@ FMT-003 医师签名规范完整，缺失扣1-2分
     function updateDashboard(info, report, defects) {
         const entry = {
             name: info.name,
-            dept: info.dept,
-            score: report['得分'],
-            level: report['等级'],
+            dept: info.dept || '黔东南州人民医院',
+            score: report['得分'] ?? 0,
+            level: report['等级'] || '--',
+            defects: defects,
             defectNames: defects.map(d => d['规则名称']).join('、') || '无缺陷',
             veto: report['一票否决']?.['触发'] || false,
             time: new Date().toLocaleString('zh-CN',{hour12:false})
         };
         dashboardHistory.unshift(entry);
 
-        // 更新 KPI
-        const scores = dashboardHistory.map(r=>r.score).filter(s=>s>0);
+        const h = dashboardHistory;
+        const scores = h.map(r => r.score);
         const avg = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : '--';
-        const qualified = dashboardHistory.filter(r=>r.score>=60).length;
-        const rate = dashboardHistory.length ? (qualified/dashboardHistory.length*100).toFixed(1)+'%' : '--';
-        const vetoCount = dashboardHistory.filter(r=>r.veto).length;
-        const defectCount = dashboardHistory.filter(r=>r.defectNames!=='无缺陷').length;
+        const defectRecords = h.filter(r => r.defectNames !== '无缺陷');
+        const rate = h.length ? (h.filter(r=>r.score>=60).length/h.length*100).toFixed(1)+'%' : '--';
+        const vetoCount = h.filter(r=>r.veto).length;
+        const levelCounts = h.reduce((acc,r)=>{
+            const l = r.level || '--';
+            acc[l] = (acc[l]||0)+1; return acc;
+        }, {});
+        const levelStr = Object.entries(levelCounts).map(([k,v])=>`${k} ${v}份`).join(' / ');
 
-        document.querySelectorAll('.db-kpi')[0]?.querySelector('.db-kpi-val')  && (document.querySelectorAll('.db-kpi')[0].querySelector('.db-kpi-val').textContent = dashboardHistory.length);
-        document.querySelectorAll('.db-kpi')[1]?.querySelector('.db-kpi-val')  && (document.querySelectorAll('.db-kpi')[1].querySelector('.db-kpi-val').textContent = avg);
-        document.querySelectorAll('.db-kpi')[2]?.querySelector('.db-kpi-val')  && (document.querySelectorAll('.db-kpi')[2].querySelector('.db-kpi-val').textContent = defectCount);
-        document.querySelectorAll('.db-kpi')[3]?.querySelector('.db-kpi-val')  && (document.querySelectorAll('.db-kpi')[3].querySelector('.db-kpi-val').textContent = vetoCount);
-        document.querySelectorAll('.db-kpi')[4]?.querySelector('.db-kpi-val')  && (document.querySelectorAll('.db-kpi')[4].querySelector('.db-kpi-val').textContent = rate);
+        // KPI
+        const kpis = document.querySelectorAll('.db-kpi');
+        if (kpis[0]) { kpis[0].querySelector('.db-kpi-val').textContent = h.length; kpis[0].querySelector('.db-kpi-trend').textContent = entry.dept; }
+        if (kpis[1]) { kpis[1].querySelector('.db-kpi-val').textContent = avg; kpis[1].querySelector('.db-kpi-trend').textContent = avg !== '--' ? (avg >= 90 ? '高于基准线' : '低于基准线') : ''; }
+        if (kpis[2]) { kpis[2].querySelector('.db-kpi-val').textContent = defectRecords.length; kpis[2].querySelector('.db-kpi-trend').textContent = `其中不合格 ${h.filter(r=>r.score<60).length} 份`; }
+        if (kpis[3]) { kpis[3].querySelector('.db-kpi-val').textContent = vetoCount; kpis[3].querySelector('.db-kpi-trend').textContent = vetoCount > 0 ? h.filter(r=>r.veto).map(r=>r.name).join('、') + '触发' : '暂无触发'; }
+        if (kpis[4]) { kpis[4].querySelector('.db-kpi-val').textContent = rate; kpis[4].querySelector('.db-kpi-trend').textContent = levelStr; }
 
-        // 更新病历明细表：在表格顶部插入新行
-        const tbody = document.querySelector('.db-table tbody');
-        if (tbody) {
-            const scoreColor = entry.score >= 90 ? '#16a34a' : entry.score >= 75 ? '#d97706' : '#ef4444';
-            const badgeClass = entry.score >= 90 ? 'low' : entry.score >= 75 ? 'mid' : 'high';
-            const badgeText  = entry.level;
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${entry.name}</td>
-                <td>${entry.dept || '黔东南州人民医院'}</td>
-                <td style="color:${scoreColor};font-weight:600;">${entry.score}</td>
-                <td><span class="db-badge ${badgeClass}">${badgeText}</span></td>
-                <td>${entry.defectNames}</td>`;
-            tbody.insertBefore(tr, tbody.firstChild);
+        // 折线图动态重绘
+        const chartEl = document.getElementById('db-trend-svg');
+        if (chartEl) {
+            const pts = h.slice(0,10).reverse();
+            const minScore = Math.max(0, Math.min(...pts.map(p=>p.score)) - 10);
+            const maxScore = 100;
+            const W = 520, H = 160, padL = 40, padR = 10, padT = 20, padB = 20;
+            const chartW = W - padL - padR, chartH = H - padT - padB;
+            const n = pts.length;
+            const xStep = n > 1 ? chartW / (n - 1) : chartW / 2;
+            const yMap = s => padT + chartH - ((s - minScore) / (maxScore - minScore)) * chartH;
+            const xMap = i => padL + (n > 1 ? i * xStep : chartW / 2);
+
+            const yTicks = [maxScore, Math.round((maxScore+minScore)/2), minScore];
+            let svg = '';
+            yTicks.forEach(v => {
+                const y = yMap(v);
+                svg += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#f3f4f6" stroke-width="1"/>`;
+                svg += `<text x="${padL-5}" y="${y+4}" text-anchor="end" font-size="10" fill="#9ca3af">${v}</text>`;
+            });
+            if (n > 0) {
+                const coords = pts.map((p,i) => `${xMap(i)},${yMap(p.score)}`).join(' ');
+                const fillCoords = coords + ` ${xMap(n-1)},${H-padB} ${xMap(0)},${H-padB}`;
+                svg += `<polygon points="${fillCoords}" fill="#eff6ff" opacity="0.6"/>`;
+                svg += `<polyline points="${coords}" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+                pts.forEach((p,i) => {
+                    const cx = xMap(i), cy = yMap(p.score);
+                    const low = p.score < 75;
+                    svg += `<circle cx="${cx}" cy="${cy}" r="${low?5:4}" fill="${low?'#ef4444':'#2563eb'}" ${low?'stroke="#fff" stroke-width="2"':''}/>`;
+                    svg += `<text x="${cx}" y="${cy-8}" text-anchor="middle" font-size="10" fill="${low?'#ef4444':'#2563eb'}">${p.score}</text>`;
+                    svg += `<text x="${cx}" y="${H-4}" text-anchor="middle" font-size="10" fill="#9ca3af">${p.name}</text>`;
+                });
+            }
+            chartEl.innerHTML = svg;
         }
 
-        // 更新柱状图：插入新条目
-        const barContainer = document.querySelector('.db-card:nth-child(1) .db-bar-row')?.parentElement;
+        // 缺陷分布环形图动态重绘
+        const allDefects = h.flatMap(r => r.defects || []);
+        const totalDefects = allDefects.length;
+        const defectTypeMap = {};
+        allDefects.forEach(d => {
+            const name = d['规则名称'] || '其他';
+            defectTypeMap[name] = (defectTypeMap[name] || 0) + 1;
+        });
+        const sortedTypes = Object.entries(defectTypeMap).sort((a,b)=>b[1]-a[1]).slice(0,4);
+        const otherCount = totalDefects - sortedTypes.reduce((s,[,v])=>s+v, 0);
+        if (otherCount > 0) sortedTypes.push(['其他', otherCount]);
+        const colors = ['#2563eb','#60a5fa','#f59e0b','#ef4444','#d1d5db'];
+        const donutEl = document.getElementById('db-donut-svg');
+        const legendEl = document.getElementById('db-donut-legend');
+        if (donutEl && legendEl) {
+            if (totalDefects === 0) {
+                donutEl.innerHTML = `<circle cx="55" cy="55" r="40" fill="none" stroke="#e5e7eb" stroke-width="18"/>
+                    <text x="55" y="51" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">0</text>
+                    <text x="55" y="64" text-anchor="middle" font-size="10" fill="#9ca3af">缺陷总数</text>`;
+                legendEl.innerHTML = '<div style="font-size:12px;color:#9ca3af;">暂无缺陷数据</div>';
+            } else {
+                const circumference = 2 * Math.PI * 40;
+                let offset = 0;
+                let arcsSvg = `<circle cx="55" cy="55" r="40" fill="none" stroke="#f3f4f6" stroke-width="18"/>`;
+                sortedTypes.forEach(([name, count], i) => {
+                    const dash = (count / totalDefects) * circumference;
+                    arcsSvg += `<circle cx="55" cy="55" r="40" fill="none" stroke="${colors[i]}" stroke-width="18"
+                        stroke-dasharray="${dash.toFixed(1)} ${(circumference-dash).toFixed(1)}"
+                        stroke-dashoffset="${(-offset).toFixed(1)}" transform="rotate(-90 55 55)"/>`;
+                    offset += dash;
+                });
+                arcsSvg += `<text x="55" y="51" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">${totalDefects}</text>
+                    <text x="55" y="64" text-anchor="middle" font-size="10" fill="#9ca3af">缺陷总数</text>`;
+                donutEl.innerHTML = arcsSvg;
+                legendEl.innerHTML = sortedTypes.map(([name, count], i) =>
+                    `<div class="db-legend-item"><div class="db-legend-dot" style="background:${colors[i]}"></div>${name} ${Math.round(count/totalDefects*100)}%</div>`
+                ).join('');
+            }
+        }
+
+        // 柱状图：完全从 dashboardHistory 重建，按分数降序
+        const barContainer = document.getElementById('db-bar-container');
         if (barContainer) {
-            const pct = entry.score;
-            const barColor = pct >= 90 ? '#2563eb' : pct >= 75 ? '#f59e0b' : '#ef4444';
-            const div = document.createElement('div');
-            div.className = 'db-bar-row';
-            div.innerHTML = `<div class="db-bar-label">${entry.name}</div><div class="db-bar-track"><div class="db-bar-fill" style="width:${pct}%;background:${barColor};"></div></div><div class="db-bar-num">${pct}</div>`;
-            barContainer.insertBefore(div, barContainer.firstChild);
+            const sorted = [...h].sort((a,b)=>b.score-a.score);
+            barContainer.innerHTML = sorted.map(r => {
+                const barColor = r.score >= 90 ? '#2563eb' : r.score >= 75 ? '#f59e0b' : '#ef4444';
+                return `<div class="db-bar-row"><div class="db-bar-label">${r.name}</div><div class="db-bar-track"><div class="db-bar-fill" style="width:${r.score}%;background:${barColor};"></div></div><div class="db-bar-num">${r.score}</div></div>`;
+            }).join('');
+            const barTitle = document.getElementById('db-bar-title');
+            if (barTitle) barTitle.textContent = `共 ${h.length} 份`;
+        }
+
+        // 明细表：完全从 dashboardHistory 重建，按分数升序（问题最多的在前）
+        const tbody = document.getElementById('db-detail-tbody');
+        if (tbody) {
+            const sorted = [...h].sort((a,b)=>a.score-b.score);
+            tbody.innerHTML = sorted.map(r => {
+                const scoreColor = r.score >= 90 ? '#16a34a' : r.score >= 75 ? '#d97706' : '#ef4444';
+                const badgeClass = r.score >= 90 ? 'low' : r.score >= 60 ? 'mid' : 'high';
+                return `<tr>
+                    <td>${r.name}</td>
+                    <td>${r.dept}</td>
+                    <td style="color:${scoreColor};font-weight:600;">${r.score}</td>
+                    <td><span class="db-badge ${badgeClass}">${r.level}</span></td>
+                    <td style="color:#6b7280;">${r.defectNames}</td>
+                </tr>`;
+            }).join('');
         }
     }
 
