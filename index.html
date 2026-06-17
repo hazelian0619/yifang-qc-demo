@@ -367,14 +367,10 @@ body {
     <!-- 主区 -->
     <div class="main">
         <!-- Banner -->
-        <div class="rp-header" style="margin:12px 16px 0; border-radius:10px;">
+        <div class="rp-header" style="margin:12px 16px 0;">
             <div class="rp-header-top">
                 <div class="rp-header-left">
-                    <div class="banner-icon" style="font-size:14px;font-weight:700;letter-spacing:-0.5px;">QC</div>
-                    <div class="rp-title">
-                        病历智能打分质检
-                        <span class="banner-badge">16阶检查</span>
-                    </div>
+                    <div class="rp-title">病历智能打分质检</div>
                 </div>
                 <button class="start-btn" onclick="startCheck()">开始质检</button>
             </div>
@@ -459,7 +455,7 @@ body {
                             <div class="rule-block">
                                 <div class="rule-row">
                                     <span class="rule-k">当前规则库</span>
-                                    <span class="rule-v link">住院病历规则库 ›</span>
+                                    <span class="rule-v link" onclick="openRuleLib()" style="cursor:pointer;">住院病历规则库 ›</span>
                                 </div>
                                 <div class="rule-row">
                                     <span class="rule-k">质检模式</span>
@@ -829,7 +825,6 @@ body {
     <div class="rp-header">
         <div class="rp-header-top">
             <div class="rp-header-left">
-                <div class="banner-icon" style="font-size:14px;font-weight:700;letter-spacing:-0.5px;">QC</div>
                 <div class="rp-title">病历智能质控评估报告</div>
             </div>
             <div class="rp-btns">
@@ -1515,9 +1510,7 @@ FORMAT-005/FMT-003 签名完整规范，缺失扣1-2分
             if (tagContainer) {
                 tagContainer.innerHTML = defects.length
                     ? defects.slice(0,6).map(c => {
-                        const reason = c['原因'] || '';
-                        // 取原因的第一句（句号/逗号前），最多14字
-                        const short = reason.split(/[，。；,;]/)[0].slice(0,14) || c['规则名称'];
+                        const short = (c['规则名称'] || '').slice(0,8);
                         return `<span class="issue-tag">${short}</span>`;
                     }).join('')
                     : '<span class="issue-tag" style="background:#f0fdf4;color:#16a34a;border-color:#bbf7d0;">无缺陷</span>';
@@ -1768,6 +1761,188 @@ FORMAT-005/FMT-003 签名完整规范，缺失扣1-2分
         a.click();
         URL.revokeObjectURL(url);
     }
+
+    // ── 规则库弹窗 ──
+    const RULE_FILES = [
+        { id:'01', name:'一票否决规则', desc:'触发任意一条直接判定丙级', rules:[
+            {code:'VETO-001', title:'无入院记录', detail:'住院病历中缺少入院记录，或入院记录未在规定时间内完成。判定结果：直接判定丙级。'},
+            {code:'VETO-002', title:'无首次病程记录', detail:'住院病历中缺少首次病程记录，或首次病程记录未在规定时间内完成。判定结果：直接判定丙级。'},
+            {code:'VETO-003', title:'无手术记录', detail:'有手术的病历中缺少手术记录。触发前提：患者住院期间进行了手术操作。'},
+            {code:'VETO-004', title:'无出院记录或死亡记录', detail:'出院病例无出院记录，或死亡病例无死亡记录。判定结果：直接判定丙级。'},
+            {code:'VETO-005', title:'死亡病例无死亡讨论记录', detail:'死亡病例中缺少死亡病例讨论记录。触发前提：患者住院期间死亡。'},
+            {code:'VETO-006', title:'缺少关键知情同意书', detail:'手术、麻醉、输血、特殊检查/治疗等缺少对应的知情同意书。触发前提：患者进行了需要签署知情同意书的诊疗活动。'},
+            {code:'VETO-007', title:'伪造或篡改病历记录', detail:'发现病历存在伪造、篡改内容的情况。判定结果：直接判定丙级。'},
+            {code:'VETO-008', title:'主诊断或主手术编码严重错误', detail:'主要诊断选择或主要手术操作编码存在严重错误，与病历实际诊疗内容严重不符。'},
+        ]},
+        { id:'02', name:'首页基本信息规则', desc:'评分总分：15分（含D类上限4分）', rules:[
+            {code:'FP-BASE-A001', title:'新生儿入院体重必填', detail:'新生儿病例必须填写入院体重。扣分：4分（仅新生儿触发）'},
+            {code:'FP-BASE-A002', title:'新生儿出生体重必填', detail:'新生儿病例必须填写出生体重。扣分：4分（仅新生儿触发）'},
+            {code:'FP-BASE-B001', title:'病案号必填且准确', detail:'病案号必须填写且准确无误。扣分：2分'},
+            {code:'FP-BASE-C001', title:'性别必填', detail:'患者性别字段必须填写。扣分：1分'},
+            {code:'FP-BASE-C002', title:'出生日期必填', detail:'患者出生日期字段必须填写。扣分：1分'},
+            {code:'FP-BASE-C003', title:'年龄必填', detail:'患者年龄字段必须填写。扣分：1分'},
+            {code:'FP-BASE-C004', title:'医疗付费方式必填', detail:'医疗付费方式字段必须填写。扣分：1分'},
+            {code:'FP-BASE-D001~D012', title:'D类基本信息字段', detail:'姓名、民族、身份证号、出生地、籍贯、职业、婚姻状况、现住址、户籍地址、工作单位、联系人等，每项0.5分，累计最多扣4分。'},
+        ]},
+        { id:'03', name:'首页住院过程信息规则', desc:'入院病情、住院天数、科室等字段完整性', rules:[
+            {code:'FP-PROC-001', title:'入院途径填写', detail:'入院途径字段应填写：门诊/急诊/其他医疗机构转入/其他。扣分：0.5分'},
+            {code:'FP-PROC-002', title:'入院科室填写', detail:'入院科室字段应填写完整。扣分：0.5分'},
+            {code:'FP-PROC-003', title:'住院天数填写', detail:'实际住院天数字段应填写正确。扣分：0.5分'},
+            {code:'FP-PROC-004', title:'出院科室填写', detail:'出院科室字段应填写完整。扣分：0.5分'},
+        ]},
+        { id:'04', name:'主诊断选择规则', desc:'主要出院诊断的选择规范', rules:[
+            {code:'DIAG-001', title:'主要诊断选择正确', detail:'主要诊断应为本次住院的主要治疗或研究的疾病或情况，不得选择症状、体征或检查结果。'},
+            {code:'DIAG-002', title:'主要诊断编码正确', detail:'主要诊断ICD-10编码应与诊断名称对应，编码精确到亚目（4位码）。'},
+            {code:'DIAG-OB-001', title:'产科主诊断规范', detail:'产科病例主诊断应选择产科情况而非胎儿/新生儿情况（仅产科病例触发）。'},
+        ]},
+        { id:'05', name:'其他诊断规则', desc:'并发症、合并症等其他诊断的填写规范', rules:[
+            {code:'DIAG-OTHER-001', title:'其他诊断完整填写', detail:'住院期间确诊的并发症、合并症均应填写为其他诊断，每项扣1分，最多扣4分。'},
+            {code:'DIAG-OTHER-002', title:'其他诊断编码正确', detail:'其他诊断编码须与诊断名称对应，每项扣1分，最多扣4分。'},
+        ]},
+        { id:'06', name:'手术操作规则', desc:'手术及操作信息填写完整性', rules:[
+            {code:'SURG-001', title:'主要手术操作填写正确', detail:'主要手术/操作名称应填写本次住院最重要的手术/操作（仅手术病例触发）。'},
+            {code:'SURG-002', title:'手术操作编码正确', detail:'手术/操作ICD-9-CM-3编码应与名称对应（仅手术病例触发）。'},
+            {code:'SURG-012', title:'植入物记录完整', detail:'使用植入物的手术应记录植入物信息（仅植入物病例触发）。'},
+        ]},
+        { id:'07', name:'入院记录规则', desc:'评分总分：20分', rules:[
+            {code:'ADM-001', title:'主诉规范', detail:'不超过20字，体现主要症状及持续时间。扣分：1-3分'},
+            {code:'ADM-002', title:'现病史完整详尽', detail:'须含起病情况、症状特点、伴随症状、诊治经过、一般情况5要素。每缺一项扣2分，最多扣6分。'},
+            {code:'ADM-003', title:'现病史与主诉呼应', detail:'现病史须围绕主诉展开，不呼应扣2分。'},
+            {code:'ADM-004', title:'既往史完整', detail:'须含健康状况、疾病史、传染病史、手术史、输血史、药物过敏史。每缺1项扣1分。'},
+            {code:'ADM-005', title:'个人史完整', detail:'须含出生地、生活习惯（烟酒）、职业接触史。每缺1项扣1分。'},
+            {code:'ADM-006', title:'婚育史/月经史完整', detail:'女性患者须有月经史。缺失扣1-2分（女性患者触发）。'},
+            {code:'ADM-007', title:'家族史完整', detail:'须记录父母健康及遗传病情况。缺失扣1分。'},
+            {code:'ADM-008', title:'体格检查及专科检查规范', detail:'须按系统全面记录，含专科检查。缺少关键系统酌情扣分。'},
+            {code:'ADM-009', title:'初步诊断完整有依据', detail:'诊断须有病历证据支持。不完整扣1-3分。'},
+            {code:'ADM-011', title:'入院记录签名完整', detail:'须有书写医师签名。缺失扣2分。'},
+        ]},
+        { id:'08', name:'病程记录规则', desc:'评分总分：30分', rules:[
+            {code:'PROG-001', title:'首次病程记录完整', detail:'须含病例特点、拟诊讨论、诊疗计划。缺任意一项扣2-4分，无记录扣5分。'},
+            {code:'PROG-002', title:'三级医师查房记录规范', detail:'上级医师须有明确诊疗意见。每缺一次扣2-4分。'},
+            {code:'PROG-003', title:'日常病程记录频次达标', detail:'危重每天1次、病重2天1次、稳定3天1次。不达标酌情扣分。'},
+            {code:'PROG-004', title:'病程记录内容有实质', detail:'须反映病情变化、治疗调整，空洞流水账扣2-4分。'},
+            {code:'PROG-005', title:'抢救记录规范', detail:'有抢救但无记录，或记录不完整。扣2-4分（仅抢救病例触发）。'},
+            {code:'PROG-006', title:'会诊记录完整', detail:'会诊记录须含会诊理由、意见和签名（仅有会诊触发）。'},
+            {code:'PROG-007', title:'疑难病例讨论记录完整', detail:'须有科主任或副主任医师以上主持的讨论记录（仅疑难病例触发）。'},
+            {code:'PROG-009', title:'转科记录完整', detail:'须有转出记录和转入记录（仅转科病例触发）。'},
+            {code:'PROG-010', title:'长期住院有阶段小结', detail:'住院>30天须有阶段小结，一般每月一次（仅长期住院触发）。'},
+            {code:'PROG-011', title:'有创操作记录完整', detail:'有创操作后须即刻书写操作记录（仅有创操作触发）。'},
+        ]},
+        { id:'09', name:'知情同意规则', desc:'评分总分：15分', rules:[
+            {code:'CONSENT-001', title:'手术知情同意书完整', detail:'须含术前诊断、手术名称、风险说明、患者及医师签名。缺失扣3分（仅手术病例触发）。'},
+            {code:'CONSENT-002', title:'麻醉知情同意书完整', detail:'需麻醉的手术前必须有麻醉知情同意书。缺失扣3分（仅麻醉手术触发）。'},
+            {code:'CONSENT-003', title:'输血知情同意书完整', detail:'输血前必须有输血治疗知情同意书。缺失扣3分（仅输血病例触发）。'},
+            {code:'CONSENT-004', title:'特殊检查/治疗知情同意', detail:'特殊检查和特殊治疗前须有知情同意书。缺失扣3分（仅相关病例触发）。'},
+            {code:'CONSENT-007', title:'危急值处理记录完整', detail:'危急值须有接收和处理记录。无处理记录扣3分（仅有危急值时触发）。'},
+        ]},
+        { id:'10', name:'出院/死亡记录规则', desc:'评分总分：10分', rules:[
+            {code:'DISCH-001', title:'出院记录内容完整', detail:'须含入出院日期、入出院诊断、诊疗经过、出院医嘱。缺失扣1-4分。'},
+            {code:'DISCH-002', title:'出院诊断与首页一致', detail:'出院记录中的出院诊断须与首页出院诊断一致。不一致扣2分。'},
+            {code:'DEATH-001', title:'死亡记录内容完整', detail:'须含死亡时间（精确到分）、死亡诊断、诊疗抢救经过、死亡原因。缺失扣5分（仅死亡病例触发）。'},
+            {code:'DEATH-002', title:'死亡讨论记录完整', detail:'须由科主任或副主任医师以上主持，含讨论意见和总结。缺失扣5分（仅死亡病例触发）。'},
+        ]},
+        { id:'11', name:'交叉一致性规则', desc:'病历各部分之间的一致性校验', rules:[
+            {code:'CROSS-001', title:'首页主诊断与出院记录一致', detail:'首页主要出院诊断须与出院记录中的出院诊断一致。'},
+            {code:'CROSS-002', title:'首页其他诊断与出院记录一致', detail:'首页其他诊断须与出院记录中的诊断列表一致，无遗漏或多余。'},
+            {code:'CROSS-003', title:'入院诊断与首次病程记录一致', detail:'入院记录初步诊断须与首次病程记录拟诊一致。'},
+            {code:'CROSS-006', title:'医嘱与病程记录一致', detail:'重要诊疗措施须在病程记录中有对应说明。不一致扣2-3分。'},
+            {code:'CROSS-014', title:'首页入院病情与入院记录一致', detail:'首页入院时情况字段须与入院记录描述的患者入院状况一致。'},
+        ]},
+        { id:'12', name:'不合理复制检测规则', desc:'检测病程记录中的大段复制粘贴', rules:[
+            {code:'COPY-001', title:'病程记录无大段复制', detail:'相邻病程记录相似度≥90%视为不合理复制，扣2-4分。'},
+            {code:'COPY-002', title:'检查结果引用规范', detail:'检查结果不应原文复制进病程记录，应有分析和解读，否则扣1-2分。'},
+        ]},
+        { id:'13', name:'编码与命名规范规则', desc:'诊断和手术操作的编码规范性', rules:[
+            {code:'CODE-001', title:'诊断名称规范', detail:'诊断名称须使用标准医学术语，不得使用简称或俗称。'},
+            {code:'CODE-002', title:'手术操作名称规范', detail:'手术/操作名称须使用标准术语，符合ICD-9-CM-3命名规范。'},
+        ]},
+        { id:'14', name:'书写格式基本规则', desc:'病历书写的基础格式规范', rules:[
+            {code:'FORMAT-004', title:'修改规范（双线划改）', detail:'错字须用双线划改，保留原记录，注明修改时间和签名。不得涂改、粘贴覆盖。扣1分。'},
+            {code:'FORMAT-005', title:'签名完整', detail:'各类记录须由书写医务人员签名；实习/试用人员书写的须有带教医师签名。扣1-2分。'},
+            {code:'FORMAT-006', title:'日期时间格式规范', detail:'须使用阿拉伯数字，采用24小时制记录。格式错误扣1分。'},
+        ]},
+        { id:'15', name:'归档完整性规则', desc:'评分总分：10分', rules:[
+            {code:'ARCHIVE-001', title:'病历资料齐全', detail:'归档病历所有记录、报告、签名应齐全完整，不缺页缺项。酌情扣分（共5分）。'},
+            {code:'ARCHIVE-002', title:'辅助检查报告齐全', detail:'住院期间所有检查报告须齐全归档。'},
+            {code:'ARCHIVE-007', title:'首页总费用填写正确', detail:'首页住院总费用必须填写且准确。缺失扣4分。'},
+        ]},
+        { id:'16', name:'评分与等级判定规则', desc:'最终评分汇总和等级判定逻辑', rules:[
+            {code:'GRADE-001', title:'评分维度及分值分配', detail:'总分100分：病案首页15分、入院记录20分、病程记录30分、知情同意15分、出院记录10分、归档完整性10分。'},
+            {code:'GRADE-002', title:'甲级病历判定', detail:'总分≥90分，且未触发任何一票否决项。'},
+            {code:'GRADE-003', title:'乙级病历判定', detail:'总分76-89分，且未触发任何一票否决项。'},
+            {code:'GRADE-004', title:'丙级病历判定', detail:'总分≤75分，或触发任意一票否决项（此时得分上限为75分）。'},
+            {code:'GRADE-005', title:'D类项目扣分上限', detail:'各维度D类项目设有累计扣分上限，防止单一维度过度扣分。'},
+        ]},
+    ];
+
+    let ruleLibOpen = false;
+    let expandedRule = null;
+    let expandedFile = null;
+
+    function openRuleLib() {
+        ruleLibOpen = true;
+        renderRuleLib();
+        document.getElementById('rule-lib-modal').style.display = 'flex';
+    }
+
+    function closeRuleLib() {
+        document.getElementById('rule-lib-modal').style.display = 'none';
+        expandedFile = null;
+        expandedRule = null;
+    }
+
+    function renderRuleLib() {
+        const listEl = document.getElementById('rl-file-list');
+        listEl.innerHTML = RULE_FILES.map(f => `
+            <div class="rl-file-item ${expandedFile === f.id ? 'active' : ''}" onclick="toggleRuleFile('${f.id}')">
+                <div class="rl-file-header">
+                    <div class="rl-file-icon">${f.id}</div>
+                    <div class="rl-file-info">
+                        <div class="rl-file-name">${f.name}</div>
+                        <div class="rl-file-desc">${f.desc}</div>
+                    </div>
+                    <div class="rl-file-arrow">${expandedFile === f.id ? '▾' : '▸'}</div>
+                </div>
+                ${expandedFile === f.id ? `
+                <div class="rl-rule-list">
+                    ${f.rules.map(r => `
+                        <div class="rl-rule-item ${expandedRule === r.code ? 'active' : ''}" onclick="event.stopPropagation(); toggleRule('${r.code}')">
+                            <div class="rl-rule-row">
+                                <span class="rl-rule-code">${r.code}</span>
+                                <span class="rl-rule-title">${r.title}</span>
+                                <span class="rl-rule-toggle">${expandedRule === r.code ? '−' : '+'}</span>
+                            </div>
+                            ${expandedRule === r.code ? `<div class="rl-rule-detail">${r.detail}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>` : ''}
+            </div>
+        `).join('');
+    }
+
+    function toggleRuleFile(id) {
+        expandedFile = expandedFile === id ? null : id;
+        expandedRule = null;
+        renderRuleLib();
+    }
+
+    function toggleRule(code) {
+        expandedRule = expandedRule === code ? null : code;
+        renderRuleLib();
+    }
 </script>
-</body>
+
+<!-- 规则库弹窗 -->
+<div id="rule-lib-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;width:640px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        <div style="padding:18px 20px 14px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+            <div>
+                <div style="font-size:16px;font-weight:600;color:#111827;">住院病历规则库</div>
+                <div style="font-size:12px;color:#9ca3af;margin-top:2px;">16个规则分类 · 国家版住院病案质量评分表框架</div>
+            </div>
+            <button onclick="closeRuleLib()" style="background:none;border:none;font-size:20px;color:#9ca3af;cursor:pointer;line-height:1;">×</button>
+        </div>
+        <div id="rl-file-list" style="overflow-y:auto;padding:12px 16px;flex:1;"></div>
+    </div>
+</div>
 </html>
