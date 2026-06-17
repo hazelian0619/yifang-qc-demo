@@ -79,10 +79,10 @@ body {
 
 /* Banner */
 .banner {
-    background:#fff; padding:16px 16px;
-    display:flex; align-items:center; justify-content:space-between;
+    background:#fff; padding:16px 20px;
     border-bottom:1px solid #e5e7eb; flex-shrink:0;
 }
+.banner-top { display:flex; align-items:center; justify-content:space-between; }
 .banner-left { display:flex; align-items:center; gap:12px; }
 .banner-icon {
     width:40px; height:40px; border-radius:8px;
@@ -95,6 +95,10 @@ body {
     background:#dbeafe; color:#2563eb; font-weight:500;
 }
 .banner-sub { font-size:12px; color:#6b7280; margin-top:2px; }
+.banner-meta { display:flex; flex-wrap:wrap; gap:0; font-size:13px; color:#374151; margin-top:10px; }
+.banner-meta-item { margin-right:32px; }
+.banner-meta-item .lbl { color:#9ca3af; margin-right:6px; }
+.banner-meta-item .val { color:#111827; font-weight:500; }
 .start-btn {
     padding:9px 20px; border-radius:6px; font-size:13px; font-weight:500;
     background:#2563eb; color:#fff; border:none; cursor:pointer;
@@ -362,16 +366,24 @@ body {
     <div class="main">
         <!-- Banner -->
         <div class="banner">
-            <div class="banner-left">
-                <div class="banner-icon" style="font-size:14px;font-weight:700;letter-spacing:-0.5px;">QC</div>
-                <div>
+            <div class="banner-top">
+                <div class="banner-left">
+                    <div class="banner-icon" style="font-size:14px;font-weight:700;letter-spacing:-0.5px;">QC</div>
                     <div class="banner-title">
                         病历智能打分质检
                         <span class="banner-badge">16阶检查</span>
                     </div>
                 </div>
+                <button class="start-btn" onclick="startCheck()">开始质检</button>
             </div>
-            <button class="start-btn" onclick="startCheck()">开始质检</button>
+            <div class="banner-meta" id="banner-meta" style="display:none;">
+                <div class="banner-meta-item"><span class="lbl">患者名称</span><span class="val" id="bm-name">--</span></div>
+                <div class="banner-meta-item"><span class="lbl">入院号</span><span class="val" id="bm-hid">--</span></div>
+                <div class="banner-meta-item"><span class="lbl">科室</span><span class="val" id="bm-dept">--</span></div>
+                <div class="banner-meta-item"><span class="lbl">文档类型</span><span class="val" id="bm-doctype">--</span></div>
+                <div class="banner-meta-item"><span class="lbl">质检时间</span><span class="val" id="bm-time">--</span></div>
+                <div class="banner-meta-item"><span class="lbl">质检等级</span><span class="val" id="bm-level">--</span></div>
+            </div>
         </div>
 
         <!-- 双栏主体 -->
@@ -1315,6 +1327,18 @@ FMT-003 医师签名规范完整，缺失扣1-2分
             document.getElementById('rp-meta-time').textContent    = now;
             document.getElementById('rp-meta-level').textContent   = (report['得分'] ?? '--') + '分 / ' + (report['等级'] || '--');
             document.getElementById('rp-doc-type').textContent     = '文档类型：' + (report['文档类型'] || '--');
+
+            // 填充主页 banner-meta
+            const bm = document.getElementById('banner-meta');
+            if (bm) {
+                document.getElementById('bm-name').textContent    = info.name;
+                document.getElementById('bm-hid').textContent     = info.hid;
+                document.getElementById('bm-dept').textContent    = info.dept;
+                document.getElementById('bm-doctype').textContent = report['文档类型'] || '--';
+                document.getElementById('bm-time').textContent    = now;
+                document.getElementById('bm-level').textContent   = (report['得分'] ?? '--') + '分 / ' + (report['等级'] || '--');
+                bm.style.display = 'flex';
+            }
 
             // 用 AI 拆分病历文本到5个段落（支持任意格式）
             splitAndFillTabs(text, defects);
