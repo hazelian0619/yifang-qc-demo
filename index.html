@@ -689,9 +689,11 @@ body {
 .rp-header {
     background:#fff; border-radius:8px; padding:16px 20px;
     margin-bottom:14px; flex-shrink:0;
+    border:1px solid #e5e7eb;
 }
-.rp-header-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; }
-.rp-title { font-size:20px; font-weight:600; color:#111827; }
+.rp-header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.rp-header-left { display:flex; align-items:center; gap:12px; }
+.rp-title { font-size:18px; font-weight:600; color:#111827; display:flex; align-items:center; gap:8px; }
 .rp-btns { display:flex; gap:8px; flex-shrink:0; }
 .rp-btn { padding:8px 16px; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; border:none; transition:all .15s; }
 .rp-btn.primary { background:#2563eb; color:#fff; }
@@ -812,7 +814,10 @@ body {
     <!-- 报告头 -->
     <div class="rp-header">
         <div class="rp-header-top">
-            <div class="rp-title">病历智能质控评估报告</div>
+            <div class="rp-header-left">
+                <div class="banner-icon" style="font-size:14px;font-weight:700;letter-spacing:-0.5px;">QC</div>
+                <div class="rp-title">病历智能质控评估报告</div>
+            </div>
             <div class="rp-btns">
                 <button class="rp-btn secondary" onclick="showReport(false)">← 返回列表</button>
                 <button class="rp-btn secondary" onclick="showReport(false); startCheck()">重新质检</button>
@@ -1291,7 +1296,12 @@ FMT-003 医师签名规范完整，缺失扣1-2分
             const tagContainer = document.getElementById('issue-tags-container');
             if (tagContainer) {
                 tagContainer.innerHTML = defects.length
-                    ? defects.slice(0,6).map(c => `<span class="issue-tag">${c['规则名称']}</span>`).join('')
+                    ? defects.slice(0,6).map(c => {
+                        const reason = c['原因'] || '';
+                        // 取原因的第一句（句号/逗号前），最多14字
+                        const short = reason.split(/[，。；,;]/)[0].slice(0,14) || c['规则名称'];
+                        return `<span class="issue-tag">${short}</span>`;
+                    }).join('')
                     : '<span class="issue-tag" style="background:#f0fdf4;color:#16a34a;border-color:#bbf7d0;">无缺陷</span>';
             }
             document.getElementById('result-section').style.display = 'block';
